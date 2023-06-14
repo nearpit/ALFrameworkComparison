@@ -27,7 +27,7 @@ def train_evaluate(model, train_loader, val_loader, criterion, optimizer, metric
             train_label = train_label.to(DEVICE)
             train_input = train_input.to(DEVICE)
 
-            output = model(train_input.float())
+            output = model(train_input.float()).to(DEVICE)
             
             batch_loss = criterion(output, train_label)
             total_loss_train += batch_loss.item()
@@ -48,7 +48,7 @@ def train_evaluate(model, train_loader, val_loader, criterion, optimizer, metric
                 val_label = val_label.to(DEVICE)
                 val_input = val_input.to(DEVICE)
 
-                output = model(val_input)
+                output = model(val_input).to(DEVICE)
 
                 batch_loss = criterion(output, val_label)
                 total_loss_val += batch_loss.item()
