@@ -1,0 +1,6 @@
+{
+    "batch_size": 128,
+    "loss": "BCEWithLogitsLoss",
+    "final_activation": "Sigmoid",
+    "metric": "BinaryAccuracy"
+}
