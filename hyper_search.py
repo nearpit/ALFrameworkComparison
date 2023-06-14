@@ -8,7 +8,7 @@ from utilities import funcs, constants as cnst
 from utilities.models import MLP 
 from utilities.classes import EarlyStopper
 
-from datasets_manipulations import load_clean_dataset, prepare_datasets
+from datasets_manipulations import load_clean_dataset, generate_toy
 
 def define_model(trial):
     input_size, output_size = train.dimensions
@@ -42,7 +42,7 @@ def objective(trial):
 
 
 if __name__ == '__main__':
-    prepare_datasets()
+    generate_toy()
     args = funcs.get_arguments()
     configs = funcs.get_configs(args.dataset)
 
