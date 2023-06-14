@@ -18,6 +18,7 @@ def get_configs(dataset_name):
 def train_evaluate(model, train_loader, val_loader, criterion, optimizer, metric, DEVICE, tune=False):
         total_loss_train = 0
         total_loss_val = 0
+        model = model.to(DEVICE)
 
         train_metric =  getattr(metrics, metric)()
         val_metric =  getattr(metrics, metric)()
