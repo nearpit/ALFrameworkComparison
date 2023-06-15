@@ -20,8 +20,8 @@ def train_evaluate(model, train_loader, val_loader, criterion, optimizer, metric
         total_loss_val = 0
         model = model.to(DEVICE)
 
-        train_metric =  getattr(metrics, metric)()
-        val_metric =  getattr(metrics, metric)()
+        train_metric =  getattr(metrics, metric)(device=DEVICE)
+        val_metric =  getattr(metrics, metric)(device=DEVICE)
 
         for train_input, train_label in train_loader:
 
@@ -33,8 +33,6 @@ def train_evaluate(model, train_loader, val_loader, criterion, optimizer, metric
             
             batch_loss = criterion(output, train_label)
             total_loss_train += batch_loss.item()
-            print(f"Predictions {output.get_device()}")
-            print(f"Labels {train_label.get_device()}")
 
             train_metric.update(input=output.squeeze(), target=train_label.squeeze())
             model.zero_grad()
