@@ -33,8 +33,8 @@ def train_evaluate(model, train_loader, val_loader, criterion, optimizer, metric
             
             batch_loss = criterion(output, train_label)
             total_loss_train += batch_loss.item()
-            print(f"Predictions {output.get_tensor()}")
-            print(f"Labels {train_label.get_tensor()}")
+            print(f"Predictions {output.get_device()}")
+            print(f"Labels {train_label.get_device()}")
 
             train_metric.update(input=output.squeeze(), target=train_label.squeeze())
             model.zero_grad()
