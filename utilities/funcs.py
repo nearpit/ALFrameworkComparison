@@ -62,8 +62,5 @@ def train(model, train_loader, val_loader, criterion, optimizer, metric, DEVICE)
         
         total_acc_val = train_metric.compute()
         # print(f"Train: Loss - {total_loss_train:.3f}, Acc - {total_acc_train:.3%} Val: Loss - {total_loss_val:.3f}, Acc - {total_acc_val:.3%}")
-<<<<<<< HEAD
         return total_loss_val, total_acc_val, model
-=======
-        return total_loss_val, total_acc_val
->>>>>>> 6a9eeadd56c4b7083033745a96ea3521b0f87d65
+
