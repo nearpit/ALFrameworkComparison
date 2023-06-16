@@ -8,7 +8,7 @@ from utilities import funcs, constants as cnst
 from utilities.models import MLP
 from utilities.classes import EarlyStopper
 
-from datasets_manipulations import load_clean_dataset
+from datasets_manipulations import load_clean_dataset, generate_toy
 
 directions = {
         "MLP": "maximize",
@@ -80,6 +80,7 @@ def objective(trial):
 
 
 if __name__ == '__main__':
+    generate_toy()
     args = funcs.get_arguments()
     configs = funcs.get_configs(args.dataset)
 

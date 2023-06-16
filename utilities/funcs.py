@@ -19,9 +19,10 @@ def get_configs(dataset_name):
 def train(model, train_loader, val_loader, criterion, optimizer, metric, DEVICE):
         total_loss_train = 0
         total_loss_val = 0
+        model = model.to(DEVICE)
 
-        train_metric =  getattr(metrics, metric)()
-        val_metric =  getattr(metrics, metric)()
+        train_metric =  getattr(metrics, metric)(device=DEVICE)
+        val_metric =  getattr(metrics, metric)(device=DEVICE)
 
         for train_input, train_label in train_loader:
 
@@ -29,10 +30,11 @@ def train(model, train_loader, val_loader, criterion, optimizer, metric, DEVICE)
             train_input = train_input.to(DEVICE)
 
             output = model(train_input.float())
+            output = output.to(DEVICE)
             
             batch_loss = criterion(output, train_label)
             total_loss_train += batch_loss.item()
-            
+
             train_metric.update(input=output.squeeze(), target=train_label.squeeze())
             model.zero_grad()
             batch_loss.backward()
@@ -50,6 +52,8 @@ def train(model, train_loader, val_loader, criterion, optimizer, metric, DEVICE)
                 val_input = val_input.to(DEVICE)
 
                 output = model(val_input)
+                output = output.to(DEVICE)
+
 
                 batch_loss = criterion(output, val_label)
                 total_loss_val += batch_loss.item()
@@ -58,4 +62,8 @@ def train(model, train_loader, val_loader, criterion, optimizer, metric, DEVICE)
         
         total_acc_val = train_metric.compute()
         # print(f"Train: Loss - {total_loss_train:.3f}, Acc - {total_acc_train:.3%} Val: Loss - {total_loss_val:.3f}, Acc - {total_acc_val:.3%}")
+<<<<<<< HEAD
         return total_loss_val, total_acc_val, model
+=======
+        return total_loss_val, total_acc_val
+>>>>>>> 6a9eeadd56c4b7083033745a96ea3521b0f87d65
