@@ -13,18 +13,3 @@ class MLP(nn.Module):
 
     def forward(self, x):
         return self.layers(x).view(-1, 1)
-    
-
-class Autoencoder(nn.Module):
-    def __init__(self, input, bottleneck, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.layers = nn.Sequential(
-            nn.Linear(input, int(input/2)),
-            nn.ReLU(),
-            nn.Linear(int(input/2), bottleneck),
-            nn.ReLU(),
-            nn.Linear(bottleneck, int(bottleneck*2)),
-            nn.Linear(int(input/2), input)
-        )
-    def forward(self, x):
-        return self.layers(x)

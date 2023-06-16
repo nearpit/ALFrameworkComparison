@@ -7,7 +7,8 @@ from utilities import constants as cnst
 
 def get_arguments():
     parser = ArgumentParser()
-    parser.add_argument('-d', '--dataset', help='What dataset to train on', required=True, choices=['dna', 'toy'])
+    parser.add_argument("-d", "--dataset", help="What dataset to train on", required=True, choices=["dna", "toy"])
+    parser.add_argument("-tm", "--tuned_model", help="What model to tune", default="MLP", choices=["MLP", "AE"])
     return parser.parse_args()
 
 def get_configs(dataset_name):
@@ -15,7 +16,7 @@ def get_configs(dataset_name):
         configs = json.load(openfile)
     return configs
 
-def train_evaluate(model, train_loader, val_loader, criterion, optimizer, metric, DEVICE, tune=False):
+def train(model, train_loader, val_loader, criterion, optimizer, metric, DEVICE):
         total_loss_train = 0
         total_loss_val = 0
 
@@ -57,4 +58,4 @@ def train_evaluate(model, train_loader, val_loader, criterion, optimizer, metric
         
         total_acc_val = train_metric.compute()
         # print(f"Train: Loss - {total_loss_train:.3f}, Acc - {total_acc_train:.3%} Val: Loss - {total_loss_val:.3f}, Acc - {total_acc_val:.3%}")
-        return total_loss_val, total_acc_val
+        return total_loss_val, total_acc_val, model
