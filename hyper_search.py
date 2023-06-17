@@ -35,12 +35,14 @@ def define_AE(trial):
     bottleneck =  trial.suggest_int("bottleneck", cnst.WIDHT_RANGE[0] - 1, max_width - 1)
     lr = trial.suggest_float("lr", cnst.LR_RANGE[0], cnst.LR_RANGE[1])
     layers_size = [max_width, bottleneck, max_width]
-    current_width = trial.suggest_int(f"width_{0}", int(max_width/2), max_width - 1)
+    current_width = trial.suggest_int(f"width_{0}", bottleneck, max_width - 1) # -1 to exclude upper bound
+
     i = 1
+
     while current_width > bottleneck:
         layers_size.insert(i, current_width)
         layers_size.insert(-i, current_width)
-        current_width = trial.suggest_int(f"width_{i}", int(current_width/2), current_width - 1) # -1 to exclude upper bound
+        current_width = trial.suggest_int(f"width_{i}", bottleneck, current_width - 1) # -1 to exclude upper bound
         i += 1
        
     layers_size.insert(0, input_size)
