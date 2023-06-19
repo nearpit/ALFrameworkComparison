@@ -9,6 +9,11 @@ def get_arguments():
     parser = ArgumentParser()
     parser.add_argument("-d", "--dataset", help="What dataset to train on", required=True, choices=["dna", "toy"])
     parser.add_argument("-tm", "--tuned_model", help="What model to tune", default="MLP", choices=["MLP", "AE"])
+    parser.add_argument("-a", "--algorithm", help="What active learning algorithm to evaluate", choices=["random", 
+                                                                                                         "oracle",
+                                                                                                         "bald", 
+                                                                                                         "coreset",
+                                                                                                         "entropy"])
     return parser.parse_args()
 
 def get_configs(dataset_name):
@@ -60,7 +65,7 @@ def train(model, train_loader, val_loader, criterion, optimizer, metric, DEVICE)
                 val_metric.update(input=output.squeeze(), target=val_label.squeeze())
                 
         
-        total_acc_val = train_metric.compute()
+        total_acc_val = val_metric.compute()
         # print(f"Train: Loss - {total_loss_train:.3f}, Acc - {total_acc_train:.3%} Val: Loss - {total_loss_val:.3f}, Acc - {total_acc_val:.3%}")
         return total_loss_val, total_acc_val, model
 

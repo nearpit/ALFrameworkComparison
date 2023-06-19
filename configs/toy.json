@@ -1,11 +1,17 @@
 {
-    "batch_size": 128,
-    "loss": "BCEWithLogitsLoss",
-    "final_activation": "Sigmoid",
-    "metric": "BinaryAccuracy",
-    "MLP_configs": {
+    "clf": {
         "weight_decay": 0.0002179029227987116,
-        "lr": 0.07362324727735912,
-        "layers_size": [89, 59]
+        "lr": 4.936738147928698e-07,
+        "layers_size": [89, 59, 1],
+        "last_activation": "Sigmoid",
+        "criterion": "BCEWithLogitsLoss",
+        "metric": "BinaryAccuracy",
+        "batch_size": 128
+    },
+    "AE": {
+        "weight_decay": 4.936738147928698e-07,
+        "lr": 0.05507320894645845,
+        "layers_size": [3, 10, 8, 7, 8, 10, 3],
+        "last_activation": "Identity"
     }
 }
