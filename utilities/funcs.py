@@ -60,7 +60,7 @@ def train(model, train_loader, val_loader, criterion, optimizer, metric, DEVICE)
                 val_metric.update(input=output.squeeze(), target=val_label.squeeze())
                 
         
-        total_acc_val = train_metric.compute()
+        total_acc_val = val_metric.compute()
         # print(f"Train: Loss - {total_loss_train:.3f}, Acc - {total_acc_train:.3%} Val: Loss - {total_loss_val:.3f}, Acc - {total_acc_val:.3%}")
         return total_loss_val, total_acc_val, model
 
