@@ -1,11 +1,11 @@
 from os.path import exists
-from os import listdir
+from os import listdir, mkdir
 import requests
 
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_svmlight_file, make_blobs
-from sklearn.preprocessing import OneHotEncoder, FunctionTransformer
+from sklearn.preprocessing import OneHotEncoder, FunctionTransformer, MinMaxScaler
 
 import utilities.constants as cnst
 from utilities.classes import VectoralDataset
@@ -44,6 +44,24 @@ def postprocess_svm_data(split_dict, feature_enc, target_enc):
         split_dict[split_name] = (feature_enc.transform(x), target_enc.transform(y))   
     return split_dict
 
+def download_raw_splice(local_path = 'datasets/splice/'):
+    
+    urls_dict = {"train":"https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/splice_scale",
+                "val_test": "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/splice.t"}
+   
+    if not exists(local_path):
+        mkdir(local_path)
+    split_dict = dict()
+
+    for split, url in urls_dict.items():
+        current_file = local_path + split + '_raw'
+        if not exists(current_file):
+            with open(current_file, 'w') as f:
+                r = requests.get(url=url)
+                f.writelines(r.content.decode("utf-8"))
+
+        split_dict[split] = load_svmlight_file(current_file, n_features=60)
+    return split_dict
 
 
 def download_raw_dna(local_path = 'datasets/dna/'):
@@ -51,7 +69,9 @@ def download_raw_dna(local_path = 'datasets/dna/'):
     train_url = "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass/dna.scale.tr"
     val_url = "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass/dna.scale.val"
     test_url = "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass/dna.scale.t"
-   
+      
+    if not exists(local_path):
+        mkdir(local_path)
 
     split_dict = dict()
 
@@ -66,7 +86,8 @@ def download_raw_dna(local_path = 'datasets/dna/'):
     return split_dict
 
 
-def save_npy(split_dict, local_path = 'datasets/dna/'):
+def save_npy(split_dict, dataset_name):
+    local_path = f"datasets/{dataset_name}"
     for split_name, data in split_dict.items():
         current_file = local_path + split_name + '.npy'
         if not exists(current_file):
@@ -75,18 +96,37 @@ def save_npy(split_dict, local_path = 'datasets/dna/'):
                 np.savez(f, x=x, y=y)
                 
 def prepare_dna():
-    feature_enc = FunctionTransformer(lambda x: x) #any preprocessing is redundant - all features are within {0, 1}
-    target_enc = OneHotEncoder(sparse_output=False)
+    
     
     split_dict = download_raw_dna()
     print("DNA Succesfully Downloaded")
     split_dict = postprocess_svm_data(split_dict, feature_enc, target_enc)
     print("DNA Succesfully Preprocessed")
+    save_npy(split_dict, "dna")
 
-    save_npy(split_dict)
+def prepare_splice():
+    feature_enc = MinMaxScaler()
+    target_enc = FunctionTransformer(lambda x: (x+1)//2) # from {-1, 1} to 
+    
+    split_dict = download_raw_splice()
+    print("Splice Succesfully Downloaded")
+    split_dict = postprocess_svm_data(split_dict, feature_enc, target_enc)
+    print("Splice Succesfully Preprocessed")
+    save_npy(split_dict, "dna")
 
 def prepare_datasets():
-    prepare_dna()
+    public_configs = {
+        "splice": {
+            "feature_enc": MinMaxScaler(),
+            "target_enc": FunctionTransformer(lambda x: (x+1)//2) # from {-1, 1} to 
+        },
+        "dna": {
+            "feature_enc": FunctionTransformer(lambda x: x), #any preprocessing is redundant - all features are within {0, 1}
+            "target_enc": OneHotEncoder(sparse_output=False),
+            "download_func": 
+        }
+    }
+
     generate_toy()
     print('Data preparation is done')
 

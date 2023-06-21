@@ -10,7 +10,7 @@ def get_arguments():
     parser.add_argument("-d", "--dataset", help="What dataset to train on", required=True, choices=["dna", "toy"])
     parser.add_argument("-tm", "--tuned_model", help="What model to tune", default="MLP", choices=["MLP", "AE"])
     parser.add_argument("-a", "--algorithm", help="What active learning algorithm to evaluate", choices=["random", 
-                                                                                                         "oracle",
+                                                                                                         "cheating",
                                                                                                          "bald", 
                                                                                                          "coreset",
                                                                                                          "entropy"])
