@@ -163,6 +163,5 @@ cython_debug/
 .vscode/
 
 # Custom
-datasets/dna
-datasets/toy
+datasets/data/*
 temp/
