@@ -1,1 +1,1 @@
-# **A**ctive __L__earning via __R__econstructional __M__odels
+**A**ctive **L**earning via **R**econstructional **M**odels
