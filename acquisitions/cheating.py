@@ -15,7 +15,7 @@ class Cheating(Strategy):
         batch = np.random.choice(self.idx_ulb, self.sample_size, replace=False)
         best_score = 0
 
-        model_path = os.getcwd() + "/temp"
+        model_path = os.getcwd() + "/temp/"
         if not os.path.exists(model_path):
             os.mkdir(model_path)
         model_path +=  "/oracle_model"
