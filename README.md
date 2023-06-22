@@ -1,1 +1,1 @@
-**A**ctive **L**earning via **R**econstructional **M**odels
+# Active Learning via Reconstructional Models (ALRM)
