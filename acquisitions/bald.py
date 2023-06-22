@@ -8,7 +8,7 @@ class Bald(Strategy):
     
     def query(self):
         self.clf.train()        # To enable Dropout 
-        n_classes = self.model_configs["layers_size"][-1]
+        n_classes = self.clf_configs["layers_size"][-1]
         if n_classes == 1:
             n_classes += 1
         total_predictions = torch.empty((0, len(self.idx_ulb), n_classes))

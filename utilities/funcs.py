@@ -16,10 +16,7 @@ def get_arguments():
                                                                                                          "entropy"])
     return parser.parse_args()
 
-def get_configs(dataset_name):
-    with open(f"configs/{dataset_name}.json", "r") as openfile:
-        configs = json.load(openfile)
-    return configs
+
 
 def train(model, train_loader, val_loader, criterion, optimizer, metric, DEVICE):
         total_loss_train = 0

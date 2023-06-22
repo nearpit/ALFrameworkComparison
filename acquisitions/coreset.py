@@ -20,7 +20,7 @@ class Coreset(Strategy):
 
         idx = min_dist.argmax()
 
-        return idx
+        return self.idx_ulb[idx]
 
     def get_embeddings(self, set_indices):
         with torch.no_grad():
@@ -28,7 +28,7 @@ class Coreset(Strategy):
         return self.latent
     
     def embedding_hook(self):
-        total_layer_depth = len(self.model_configs["layers_size"])
+        total_layer_depth = len(self.clf_configs["layers_size"])
         penultimate_layer_name = f"dense_{total_layer_depth - 2}" 
         penultimate_layer = getattr(self.clf.layers, penultimate_layer_name)
         penultimate_layer.register_forward_hook(self.get_activation(penultimate_layer_name))

@@ -1,0 +1,7 @@
+{
+    "n_features": 180,
+    "n_instances": 3186,
+    "n_labeled":100,
+    "pool_size":2000,
+    "n_targets": 3
+}

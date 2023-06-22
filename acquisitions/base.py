@@ -9,8 +9,8 @@ from utilities.classes import EarlyStopper
 
 class Strategy:
     def __init__(self, 
-                 model_arch,
-                 model_configs,
+                 clf_arch,
+                 clf_configs,
                  data,
                  idx_lb, 
                  epochs=cnst.EPOCHS):
@@ -19,8 +19,8 @@ class Strategy:
         torch.manual_seed(cnst.RANDOM_STATE)
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model_arch = model_arch
-        self.model_configs = model_configs
+        self.clf_arch = clf_arch
+        self.clf_configs = clf_configs
         self.clf = self.initialize_model().to(self.device)
 
         self.data = data
@@ -30,7 +30,7 @@ class Strategy:
         self.val_loader = DataLoader(data["val"], batch_size=self.clf.batch_size)
         self.test_loader = DataLoader(data["test"], batch_size=self.clf.batch_size)
 
-        self.intact_idx = np.arange(self.train_dataset.y.shape[0])
+        self.idx_intact = np.arange(self.train_dataset.y.shape[0])
         self.idx_lb = idx_lb
 
         self.epochs = epochs
@@ -60,7 +60,7 @@ class Strategy:
 
     @property
     def idx_ulb(self):
-        return np.delete(self.intact_idx, self.idx_lb)
+        return np.delete(self.idx_intact, self.idx_lb)
     
     @property
     def lb_loader(self):
@@ -90,7 +90,7 @@ class Strategy:
         return self.train_dataset[self.idx_ulb]
 
     def initialize_model(self):
-        return self.model_arch(**self.model_configs)
+        return self.clf_arch(**self.clf_configs)
 
     def eval(self, split_name):
 

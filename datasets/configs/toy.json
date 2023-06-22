@@ -1,4 +1,10 @@
 {
+    "n_features": 2,
+    "n_instances": 500, 
+    "n_labeled":10, 
+    "pool_size":300,
+    "n_honeypot": 100, 
+    "n_targets": 1,
     "clf": {
         "weight_decay": 0.0002179029227987116,
         "lr": 0.07362324727735912,

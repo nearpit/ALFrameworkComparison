@@ -59,7 +59,6 @@ def download_raw_splice(local_path = 'datasets/splice/'):
             with open(current_file, 'w') as f:
                 r = requests.get(url=url)
                 f.writelines(r.content.decode("utf-8"))
-
         split_dict[split] = load_svmlight_file(current_file, n_features=60)
     return split_dict
 
@@ -123,7 +122,6 @@ def prepare_datasets():
         "dna": {
             "feature_enc": FunctionTransformer(lambda x: x), #any preprocessing is redundant - all features are within {0, 1}
             "target_enc": OneHotEncoder(sparse_output=False),
-            "download_func": 
         }
     }
 
