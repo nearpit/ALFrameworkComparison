@@ -13,7 +13,7 @@
 3. Import the added entity to the _\_\_init\_\_.py_ file in the _acquisition_ folder.
 
 
-### TODO
+### \#TODO
 - [ ] Debug DNA
 - [ ] Debug Splice
 - [ ] Finish ALRM 
