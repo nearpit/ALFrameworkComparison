@@ -14,6 +14,14 @@ class VectoralDataset(Dataset):
     target_encoder = None
     configs = None
 
+    # Loading configs for every non-base dataset class
+    def __init_subclass__(cls, **kwargs):
+        if cls.dataset_name:
+            with open(f"datasets/configs/{cls.dataset_name}.json", "r") as openfile:
+                cls.configs = json.load(openfile)
+        super().__init_subclass__(**kwargs)
+
+
     def __init__(self, split_name):
         super().__init__()
 

@@ -12,8 +12,6 @@ class Dna(SVMDataset):
     urls_dict = {"train":"https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass/dna.scale.tr",
                           "val":"https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass/dna.scale.val",
                           "test":"https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass/dna.scale.t"}
-    with open(f"datasets/configs/{dataset_name}.json", "r") as openfile:
-        configs = json.load(openfile)
 
 
     def __init__(self, *args, **kwargs):

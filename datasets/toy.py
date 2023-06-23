@@ -12,11 +12,7 @@ class Toy(VectoralDataset):
 
     dataset_name = "toy"
     feature_encoder = MinMaxScaler()
-    target_encoder = FunctionTransformer(lambda x: x) # identity transformation
-
-    with open(f"datasets/configs/{dataset_name}.json", "r") as openfile:
-        configs = json.load(openfile)
-    
+    target_encoder = FunctionTransformer(lambda x: x) # identity transformation    
 
     def __init__(self,
                  *args, **kwargs):
