@@ -31,7 +31,7 @@ class Toy(VectoralDataset):
         x = np.concatenate((x, x_hp)).astype(np.float32)
         y = np.concatenate((y, y_hp)).reshape(-1, 1).astype(np.float32)
         plt.scatter(x[:, 0], x[:, 1], c=y)
-        plt.savefig(f"{self.location}/dataset_representation.png")
+        plt.savefig(f"{self.location}//dataset_representation.png")
         return {"x": x, "y":y}
 
     def split(self, data):
