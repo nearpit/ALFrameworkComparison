@@ -1,4 +1,4 @@
-# Active Learning via Reconstructional Models (ALRM)
+# Active Learning via Reconstruction Models (ALRM)
 
 ### To add a new acquisition function
 
