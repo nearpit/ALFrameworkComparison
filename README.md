@@ -1,4 +1,12 @@
 # Active Learning via Reconstruction Models (ALRM)
+## Installation
+
+`
+conda create -n alrm python=3.9
+conda activate alrm
+git clone https://github.com/Nearpit/ALRM.git
+pip install .
+`
 
 ### To add a new acquisition function
 
