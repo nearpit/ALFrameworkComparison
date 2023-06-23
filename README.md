@@ -1,7 +1,7 @@
 # Active Learning via Reconstruction Models (ALRM)
 ## Installation
 
-` conda create -n alrm python=3.9'&nbsp'
+` conda create -n alrm python=3.9 '&nbsp'
 conda activate alrm  
 git clone https://github.com/Nearpit/ALRM.git
 pip install .`
