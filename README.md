@@ -11,3 +11,9 @@
 1. Add a new class to the _dataset_ folder inhereting some of the _base_ classes.
 2. Add the relative name for the `--d` argument.
 3. Import the added entity to the _\_\_init\_\_.py_ file in the _acquisition_ folder.
+
+
+### TODO
+- [ ] Debug DNA
+- [ ] Debug Splice
+- [ ] Finish ALRM 
