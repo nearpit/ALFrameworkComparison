@@ -30,7 +30,7 @@ pip install .
 
 
 ### \#TODO
-- [ ] Refactor binary classification to cross entropy
+- [x] Refactor binary classification to cross entropy
 - [ ] Debug DNA
 - [ ] Debug Splice
 - [ ] Finish ALRM 
