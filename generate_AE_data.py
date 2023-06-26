@@ -7,10 +7,9 @@ from optuna.trial import TrialState
 from torcheval import metrics
 
 from utilities import funcs, constants as cnst
-from utilities.models import MLP
-from utilities.classes import EarlyStopper
+from utilities.dl_backbones import MLP
+from utilities.dl_backbones import EarlyStopper
 
-from datasets_manipulations import load_clean_dataset
 
 args = funcs.get_arguments()
 configs = funcs.get_configs(args.dataset)

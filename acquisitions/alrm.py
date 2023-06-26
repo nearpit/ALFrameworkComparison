@@ -1,7 +1,7 @@
 import torch
 
 from acquisitions import Strategy
-from utilities.classes import EarlyStopper
+from utilities.dl_backbones import EarlyStopper
 import utilities.constants as cnst
 
 # Active Learning via Reconstruction Model
@@ -17,7 +17,7 @@ class Alrm(Strategy):
         self.train_rm()
         with torch.no_grad():
             inputs = self.get_unlabeled()[0].to(self.device)
-            predictions = self.clf(inputs)
+            predictions = self.upstream_model(inputs)
             _, ulb_loss = self.eval_rm("ulb")
 
         meta_input = torch.cat((predictions, ulb_loss))
@@ -37,9 +37,9 @@ class Alrm(Strategy):
                 labels = labels.to(self.device)
                 inputs = inputs.to(self.device)
 
-                predictions = self.clf(inputs)
+                predictions = self.upstream_model(inputs)
 
-                batch_loss = self.clf.criterion(predictions, labels)
+                batch_loss = self.upstream_model.criterion(predictions, labels)
                 total_loss += batch_loss.item()
                 metric.update(input=predictions.ravel(), target=labels.ravel())
         return total_loss, metric.compute().item()

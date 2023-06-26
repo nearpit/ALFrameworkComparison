@@ -3,7 +3,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_blobs
-from sklearn.preprocessing import FunctionTransformer, MinMaxScaler
+from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 
 from datasets.base import VectoralDataset
 import utilities.constants as cnst
@@ -12,7 +12,7 @@ class Toy(VectoralDataset):
 
     dataset_name = "toy"
     feature_encoder = MinMaxScaler()
-    target_encoder = FunctionTransformer(lambda x: x) # identity transformation    
+    target_encoder = OneHotEncoder(sparse_output=False)
 
     def __init__(self,
                  *args, **kwargs):

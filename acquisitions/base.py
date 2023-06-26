@@ -1,16 +1,20 @@
+import optuna 
 import torch
 from torch.utils.data import DataLoader, Subset
 
 import numpy as np
 
 from utilities import constants as cnst
-from utilities.classes import EarlyStopper
+from utilities.dl_backbones import EarlyStopper
 
 
 class Strategy:
+    
+    upstream_model = None
+
     def __init__(self, 
-                 clf_arch,
-                 clf_configs,
+                 upstream_arch,
+                 upstream_configs,
                  data,
                  idx_lb, 
                  epochs=cnst.EPOCHS):
@@ -19,16 +23,15 @@ class Strategy:
         torch.manual_seed(cnst.RANDOM_STATE)
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.clf_arch = clf_arch
-        self.clf_configs = clf_configs
-        self.clf = self.initialize_model().to(self.device)
+        self.upstream_arch = upstream_arch
+        self.upstream_configs = upstream_configs
 
         self.data = data
         self.train_dataset = data['train']
         self.test_dataset = data['test']
 
-        self.val_loader = DataLoader(data["val"], batch_size=self.clf.batch_size)
-        self.test_loader = DataLoader(data["test"], batch_size=self.clf.batch_size)
+        self.val_loader = DataLoader(data["val"], batch_size=upstream_configs["batch_size"])
+        self.test_loader = DataLoader(data["test"], batch_size=upstream_configs["batch_size"])
 
         self.idx_intact = np.arange(self.train_dataset.y.shape[0])
         self.idx_lb = idx_lb
@@ -57,6 +60,14 @@ class Strategy:
                 return func(self, *args, **kwargs)
 
             return wrapper
+    
+    def initilize_first(func):
+        def wrapper(self, *args, **kwargs):
+                if not self.upstream_model:
+                    self.upstream_model = self.initialize_upstream()
+                     # to make sure that we initialize the upstream model
+                return func(self, *args, **kwargs)
+        return wrapper
 
     @property
     def idx_ulb(self):
@@ -65,14 +76,14 @@ class Strategy:
     @property
     def lb_loader(self):
         return DataLoader(Subset(self.train_dataset, self.idx_lb), 
-                          batch_size=self.clf.batch_size, 
+                          batch_size=self.upstream_configs["batch_size"], 
                           shuffle=True, 
                           drop_last=True)
     
     @property
     def ulb_loader(self):
         return DataLoader(Subset(self.train_dataset, self.idx_ulb), 
-                          batch_size=self.clf.batch_size, 
+                          batch_size=self.upstream_configs["batch_size"], 
                           shuffle=True, 
                           drop_last=True)
 
@@ -89,60 +100,63 @@ class Strategy:
     def get_unlabeled(self):
         return self.train_dataset[self.idx_ulb]
 
-    def initialize_model(self):
-        return self.clf_arch(**self.clf_configs)
-
+    def initialize_upstream(self):
+        return self.upstream_arch(self.device, **self.upstream_configs)
+    
+    def update_upstream_configs(self, upstream_configs):
+        self.upstream_configs.update(upstream_configs)
+        self.upstream_model = self.initialize_upstream()
+    
     def eval(self, split_name):
 
         total_loss = 0
-        metric = self.clf.metric(device=self.device)
+
         loader = getattr(self, f"{split_name}_loader")
         with torch.no_grad():
-            for inputs, labels in loader:
+            for inputs, targets in loader:
 
-                labels = labels.to(self.device)
+                targets = targets.to(self.device)
                 inputs = inputs.to(self.device)
 
-                output = self.clf(inputs)
+                predictions = self.upstream_model(inputs)
 
-                batch_loss = self.clf.criterion(output, labels)
+                batch_loss = self.upstream_model.criterion(predictions, targets)
                 total_loss += batch_loss.item()
-                metric.update(input=output.ravel(), target=labels.ravel())
-        return total_loss, metric.compute().item()
+                self.upstream_model.metrics_set.update(inputs=predictions, targets=targets)  
 
-    def train_clf(self):
+        return total_loss, self.upstream_model.metrics_set.flush()
+
+    @initilize_first
+    def train_upstream(self, trial=None):
         # TO DISABLE DROPOUT (and Normalization if it is added)
-        self.clf.eval()
+        self.upstream_model.eval()
         
         early_stopper = EarlyStopper(patience=cnst.PATIENCE, min_delta=cnst.MIN_DELTA)
 
-        for _ in range(self.epochs):
-            total_loss_train = 0
-            total_loss_val = 0
+        for epoch_num in range(self.epochs):
+            train_loss = 0
 
-            train_metric =  self.clf.metric(device=self.device)
-            val_metric =  self.clf.metric(device=self.device)
+            for inputs, targets in self.lb_loader:
 
-            for inputs, labels in self.lb_loader:
-
-                labels = labels.to(self.device)
+                targets = targets.to(self.device)
                 inputs = inputs.to(self.device)
 
-                predictions = self.clf(inputs.float())
+                predictions = self.upstream_model(inputs.float())
                 
-                batch_loss = self.clf.criterion(predictions, labels)
-                total_loss_train += batch_loss.item()
-
-                train_metric.update(input=predictions.ravel(), target=labels.ravel())
-                self.clf.zero_grad()
+                batch_loss = self.upstream_model.criterion(predictions, targets.float())
+                train_loss += batch_loss.item()
+                self.upstream_model.metrics_set.update(inputs=predictions, targets=targets)
+                self.upstream_model.zero_grad()
                 batch_loss.backward()
-                self.clf.optimizer.step()
-            
-                       
-            total_acc_train = train_metric.compute()
-            loss_val, acc_val = self.eval("val")
+                self.upstream_model.optimizer.step()
+                                 
+            train_metrics = self.upstream_model.metrics_set.flush()
+            val_loss, val_metrics = self.eval("val")
 
-            if early_stopper.early_stop(loss_val):
+            if trial:
+                trial.report(val_loss, epoch_num)
+                if trial.should_prune():
+                    raise optuna.exceptions.TrialPruned()
+                
+            if early_stopper.early_stop(val_loss):
                 break
-    
-

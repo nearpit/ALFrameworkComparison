@@ -24,13 +24,13 @@ class Coreset(Strategy):
 
     def get_embeddings(self, set_indices):
         with torch.no_grad():
-            self.clf(torch.Tensor(self.train_dataset[set_indices][0]))
+            self.upstream_model(torch.Tensor(self.train_dataset[set_indices][0]))
         return self.latent
     
     def embedding_hook(self):
-        total_layer_depth = len(self.clf_configs["layers_size"])
+        total_layer_depth = len(self.upstream_configs["layers_size"])
         penultimate_layer_name = f"dense_{total_layer_depth - 2}" 
-        penultimate_layer = getattr(self.clf.layers, penultimate_layer_name)
+        penultimate_layer = getattr(self.upstream_model.layers, penultimate_layer_name)
         penultimate_layer.register_forward_hook(self.get_activation(penultimate_layer_name))
         
     def get_activation(self, name):

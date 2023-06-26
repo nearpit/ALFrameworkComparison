@@ -3,5 +3,5 @@
     "n_instances": 3175,
     "n_labeled":100,
     "pool_size":1000,
-    "n_targets": 1
+    "n_targets": 2
 }

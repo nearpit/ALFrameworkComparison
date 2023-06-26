@@ -22,10 +22,10 @@ class Cheating(Strategy):
         torch.save(self.model.state_dict(), model_path)
 
         for candidate in batch:
-            self.model = self.initialize_model()
+            self.model = self.initialize_upstream()
             self.model.load_state_dict(torch.load(model_path))
             self.update(candidate)
-            self.train_clf()
+            self.train_upstream()
             loss, accuracy = self.eval('val')
             if accuracy >= best_score:
                 best_score = accuracy

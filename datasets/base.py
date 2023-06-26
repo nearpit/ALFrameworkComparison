@@ -58,8 +58,8 @@ class VectoralDataset(Dataset):
     
     def load_clean(self):
         with np.load(f"{self.location}/{self.split_name}.npy") as file:
-            self.x = file["x"]
-            self.y = file["y"]
+            self.x = file["x"].astype(np.float32)
+            self.y = file["y"].astype(np.float32)
     
     def save_npy(self, data_dict):
         for split_name, data in data_dict.items():
@@ -68,14 +68,15 @@ class VectoralDataset(Dataset):
 
     def preprocess(self, data):
         for data_shard in data.values():
-            x, y = data_shard["x"], np.reshape(data_shard["y"], (-1, self.configs["n_targets"]))
+            x, y = data_shard["x"], data_shard["y"]
             self.feature_encoder.fit(x)
             self.target_encoder.fit(y)
             
         for shard_name, data_shard in data.items():
-            x, y = data_shard["x"], np.reshape(data_shard["y"], (-1, self.configs["n_targets"]))
+            x, y = data_shard["x"], data_shard["y"]
             data[shard_name]["x"] = self.feature_encoder.transform(x)
             data[shard_name]["y"] = self.target_encoder.transform(y)
+           
         return data
 
     def _split(self, array_size, shares=[0.6, 0.2]):
