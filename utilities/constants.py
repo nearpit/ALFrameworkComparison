@@ -3,7 +3,6 @@ DUMMY_VAR = 1e-5
 DUMMY_ARR = [10, 5]
 
 # Active Learning
-BUDGET = 1000
 HINDERED_ITERATIONS = 10 
 
 # Monte-Carlo BALD
@@ -16,7 +15,7 @@ WIDHT_RANGE = [4, 92]
 LR_RANGE = [1e-4, 1e-1]
 
 # General DL
-OPTIMIZER = "Adam"
+OPTIMIZER = "SGD"
 EPOCHS = 500
 PATIENCE = 50
 MIN_DELTA = 0

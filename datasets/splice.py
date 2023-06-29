@@ -13,7 +13,7 @@ class Splice(SVMDataset):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def split(self, data, train_share=0.8):
+    def split(self, data, train_share=0.6):
         #CAVEAT: Make sure you have the same train_size in the config file - int(train_share*1000)
         n_instances = len(data["train"]["x"])
         train_idx, val_idx = self._split(n_instances, [train_share])

@@ -1,8 +1,8 @@
 {
     "n_features": 2,
     "n_instances": 500, 
-    "n_labeled":10, 
-    "pool_size":300,
+    "n_labeled": 10, 
+    "train_size":300,
     "n_honeypot": 100, 
     "n_classes": 2,
     "batch_size": 8,

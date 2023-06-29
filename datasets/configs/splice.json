@@ -1,10 +1,10 @@
 {
     "n_features": 60,
     "n_instances": 3175, 
-    "n_labeled":700, 
-    "train_size":800,
+    "n_labeled":64, 
+    "train_size":600,
     "n_classes": 2,
-    "batch_size": 128,
+    "batch_size": 32,
     "budget":2000,
     "clf_metrics": {
         "MulticlassAccuracy": {

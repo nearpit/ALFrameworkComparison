@@ -64,8 +64,8 @@ class Strategy:
     def initilize_first(func):
         def wrapper(self, *args, **kwargs):
                 if not self.upstream_model:
-                    self.upstream_model = self.initialize_upstream()
-                     # to make sure that we initialize the upstream model
+                    self.upstream_model = self.initialize_upstream()  # to make sure that we initialize the upstream model
+                    
                 return func(self, *args, **kwargs)
         return wrapper
 

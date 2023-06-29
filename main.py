@@ -36,15 +36,16 @@ if __name__ == '__main__':
     new_hypers = funcs.hypers_search(data=data, model_arch_name="MLP", model_configs=model_configs)
     acq_model.update_upstream_configs(new_hypers)
 
-    for idx in range(Dataclass.configs["budget"]):
+    for idx in range(Dataclass.configs["train_size"]):
 
         acq_model.train_upstream()
-        current_performance = acq_model.eval("test")
-        perforamnce.append(current_performance)
+        test_performance = acq_model.eval("test")
+        val_performance = acq_model.eval("val")
+        perforamnce.append(test_performance)
         idx_cand = acq_model.query()
         acq_model.update(idx_cand)
-        val_performance = acq_model.eval("val")
-        print(current_performance, val_performance, idx_cand, idx, len(acq_model.idx_ulb))
+
+        print(val_performance, test_performance, idx_cand, len(acq_model.idx_lb), len(acq_model.idx_ulb))
 
         if retuner.early_stop(val_performance[0]): # if training is hindered
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!NEW HYPERS WERE REQUESTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")

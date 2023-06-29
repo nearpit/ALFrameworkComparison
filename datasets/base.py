@@ -28,7 +28,7 @@ class VectoralDataset(Dataset):
         self.location = "datasets/data/" + self.dataset_name
 
         if not os.path.exists(self.location):
-            os.mkdir(self.location)
+            os.makedirs(self.location)
     
         self.split_name = split_name
 
