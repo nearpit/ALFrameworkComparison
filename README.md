@@ -34,5 +34,5 @@ pip install .
 - [x] Refactor binary classification to cross-entropy
 - [x] Finish Online Training/Tuning
 - [x] Debug DNA
-- [ ] Debug Splice
+- [x] Debug Splice
 - [ ] Finish ALRM 
