@@ -80,8 +80,11 @@ class Strategy:
                           shuffle=True, 
                           drop_last=True)
 
-    def query(self):
+    def get_scores(self):
         pass
+
+    def query(self):
+        return self.idx_ulb[self.get_scores().argmax()]
 
     def update(self, idx):
         self.idx_lb = np.append(self.idx_lb, idx)

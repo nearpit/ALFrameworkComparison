@@ -13,7 +13,7 @@ class Alrm(Strategy):
         self.model.load_state_dict(torch.load(model_path))
     
     @Strategy.reset_model(model_name="rm")
-    def query(self):
+    def get_scores(self):
         self.train_rm()
         with torch.no_grad():
             inputs = self.get_unlabeled()[0].to(self.device)
@@ -22,7 +22,7 @@ class Alrm(Strategy):
 
         meta_input = torch.cat((predictions, ulb_loss))
         scores = self.meta_acq(meta_input)
-        return self.idx_ulb[scores.argmax()]
+        return scores
 
     def eval_rm(self, split_name):
         total_loss = 0

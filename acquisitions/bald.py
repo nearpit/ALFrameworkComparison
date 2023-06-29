@@ -6,7 +6,7 @@ class Bald(Strategy):
         super().__init__(*args, **kwargs)
         self.forward_passes = forward_passes
     
-    def query(self):
+    def get_scores(self):
         self.upstream_model.train()        # To enable Dropout 
         n_classes = self.upstream_configs["layers_size"][-1]
         total_predictions = torch.empty((0, len(self.idx_ulb), n_classes))
@@ -21,5 +21,5 @@ class Bald(Strategy):
         total_uncertainty = -(average_prob*torch.log(average_prob)).sum(dim=-1)
         data_uncertainty = (-(total_predictions*torch.log(total_predictions))).sum(dim=-1).mean(dim=0)
         knowledge_uncertainty = total_uncertainty - data_uncertainty
-        return self.idx_ulb[knowledge_uncertainty.argsort()[-1]]
+        return knowledge_uncertainty
     

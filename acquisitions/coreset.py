@@ -10,7 +10,7 @@ class Coreset(Strategy):
         self.latent = None
     
     @Strategy.hook_penultimate_once    
-    def query(self):
+    def get_scores(self):
         m = self.get_unlabeled()[0].shape[0]
 
         latent_ulb, latent_lb = self.get_embeddings(self.idx_ulb), self.get_embeddings(self.idx_lb)
@@ -18,9 +18,7 @@ class Coreset(Strategy):
         pair_distance = pairwise_distances(latent_ulb, latent_lb)
         min_dist = np.amin(pair_distance, axis=1)
 
-        idx = min_dist.argmax()
-
-        return self.idx_ulb[idx]
+        return min_dist
 
     def get_embeddings(self, set_indices):
         with torch.no_grad():

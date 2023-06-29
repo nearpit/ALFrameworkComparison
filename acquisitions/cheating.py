@@ -11,10 +11,9 @@ class Cheating(Strategy):
         super().__init__(*args, **kwargs)
         self.sample_size = sample_size
     
-    def query(self):
+    def get_scores(self):
         batch = np.random.choice(self.idx_ulb, self.sample_size, replace=False)
-        best_score = float("Inf")
-
+        scores = np.full((len(self.idx_intact)), -1.)
         model_path = os.getcwd() + "/temp/"
         if not os.path.exists(model_path):
             os.mkdir(model_path)
@@ -27,9 +26,7 @@ class Cheating(Strategy):
             self.update(candidate)
             self.train_upstream()
             loss, accuracy = self.eval('val')
-            if loss <= best_score:
-                best_score = loss
-                best_candidate = candidate
+            scores[candidate] = 1 / (np.finfo(np.float32).eps + loss) # to revert the loss values in order to align argmax query
             self.idx_lb = self.idx_lb[:-1] # removing just added candidate
         
-        return best_candidate
+        return scores[self.idx_ulb]
