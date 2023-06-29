@@ -20,10 +20,7 @@ class MLP(nn.Module):
                  *args, **kwargs):
         
         super().__init__(*args, **kwargs)
-        # self.layers = nn.Sequential(OrderedDict([
-        #                             ("dropout_0", nn.Dropout(cnst.DROPOUT_RATE)), 
-        #                             ("dense_0", nn.LazyLinear(layers_size[0])), 
-        #                             ("activation_0", nn.ReLU())]))
+
         self.layers = nn.Sequential()
         
         for idx, _ in enumerate(layers_size[:-1]):
@@ -58,6 +55,8 @@ class EarlyStopper:
         elif validation_loss > (self.min_validation_loss + self.min_delta):
             self.counter += 1
             if self.counter >= self.patience:
+                self.counter = 0
+                self.min_validation_loss = float("Inf")
                 return True
         return False
     

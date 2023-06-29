@@ -25,13 +25,13 @@ pip install .
    1. __n_features__ - the number of features of the added dataset
    2. __n_instances__ - the number of instances of the added dataset
    3. __n_labeled__ - the number of labeled instances at the begging of the AL process
-   4. __pool_size__ - the number of instances in the train set(i.e. number of labeled  + unlabeled instances)
+   4. __train_size__ - the number of instances in the train set(i.e. number of labeled  + unlabeled instances)
    5. __n_classes__ - the number of classes of the target space (CAVEAT, set it to 1 in case of binary classification)
 
 
 ### \#TODO
 - [x] Refactor binary classification to cross-entropy
-- [ ] Finish Online Training/Tuning
-- [ ] Debug DNA
+- [x] Finish Online Training/Tuning
+- [x] Debug DNA
 - [ ] Debug Splice
 - [ ] Finish ALRM 

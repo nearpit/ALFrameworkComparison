@@ -10,8 +10,8 @@ class Dna(SVMDataset):
     target_encoder = OneHotEncoder(sparse_output=False)
 
     urls_dict = {"train":"https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass/dna.scale.tr",
-                          "val":"https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass/dna.scale.val",
-                          "test":"https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass/dna.scale.t"}
+                "val":"https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass/dna.scale.val",
+                "test":"https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass/dna.scale.t"}
 
 
     def __init__(self, *args, **kwargs):

@@ -79,13 +79,6 @@ class Strategy:
                           batch_size=self.upstream_configs["batch_size"], 
                           shuffle=True, 
                           drop_last=True)
-    
-    @property
-    def ulb_loader(self):
-        return DataLoader(Subset(self.train_dataset, self.idx_ulb), 
-                          batch_size=self.upstream_configs["batch_size"], 
-                          shuffle=True, 
-                          drop_last=True)
 
     def query(self):
         pass

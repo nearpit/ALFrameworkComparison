@@ -12,7 +12,7 @@ from acquisitions import Strategy
 
 def get_arguments():
     parser = ArgumentParser()
-    parser.add_argument("-d", "--dataset", help="What dataset to train on", required=True, choices=["dna", "toy"])
+    parser.add_argument("-d", "--dataset", help="What dataset to train on", required=True, choices=["dna", "splice", "toy"])
     parser.add_argument("-a", "--algorithm", help="What active learning algorithm to evaluate", choices=["random", 
                                                                                                          "cheating",
                                                                                                          "bald", 
@@ -93,7 +93,7 @@ def params_wrapper(best_params, model_configs, model="MLP"):
     return decoded_params
 
 def hypers_search(data, model_arch_name, model_configs):
-    optuna.logging.set_verbosity(optuna.logging.WARNING)
+    # optuna.logging.set_verbosity(optuna.logging.WARNING)
     optuna_pruner = getattr(optuna.pruners, cnst.OPTUNA_PRUNER["name"])(**cnst.OPTUNA_PRUNER["configs"])
     optuna_sampler = getattr(optuna.samplers, cnst.OPTUNA_SAMPLER["name"])(seed=cnst.RANDOM_STATE, 
                                                                            **cnst.OPTUNA_SAMPLER["configs"])

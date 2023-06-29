@@ -36,7 +36,7 @@ class VectoralDataset(Dataset):
             data = self.obtain()
             data = self.split(data)
             data = self.preprocess(data)
-            self.save_npy(data)            
+            self.save_npz(data)            
         
         self.load_clean()
 
@@ -52,18 +52,18 @@ class VectoralDataset(Dataset):
         return self.x.shape[1], self.y.shape[1]
     
     def file_exists(self):
-        splits = ["train.npy", "val.npy", "test.npy"]
+        splits = ["train.npz", "val.npz", "test.npz"]
         existed_files = os.listdir(self.location)
         return all([elem in existed_files for elem in splits])
     
     def load_clean(self):
-        with np.load(f"{self.location}/{self.split_name}.npy") as file:
+        with np.load(f"{self.location}/{self.split_name}.npz", allow_pickle=True) as file:
             self.x = file["x"].astype(np.float32)
             self.y = file["y"].astype(np.float32)
     
-    def save_npy(self, data_dict):
+    def save_npz(self, data_dict):
         for split_name, data in data_dict.items():
-            with open(f"{self.location}/{split_name}.npy", "wb") as f:
+            with open(f"{self.location}/{split_name}.npz", "wb") as f:
                 np.savez(f, x=data["x"], y=data["y"])   
 
     def preprocess(self, data):
@@ -101,12 +101,13 @@ class SVMDataset(VectoralDataset):
 
     def obtain(self):
         data = {}
-        for split_name, url in self.urls.items():
-            with open(self.location + split_name + "_raw", 'w') as f:
+        for split_name, url in self.urls_dict.items():
+            file_path = f"{self.location}_{split_name}_raw"
+            with open(file_path, 'w') as f:
                 r = requests.get(url)
                 f.writelines(r.content.decode("utf-8"))
-
-            data[split_name] = load_svmlight_file(self.location + split_name + "_raw", 
-                                                  n_features=self.configs["n_features"])
-            data = self.split(data)
+            x, y  = load_svmlight_file(file_path, n_features=self.configs["n_features"])
+            data[split_name] = {"x": np.asarray(x.todense(), dtype=np.float32), "y": y.reshape(-1, 1)}
+            os.remove(file_path)
+        
         return data

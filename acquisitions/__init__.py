@@ -1,5 +1,5 @@
 from .base import Strategy
-from .random_sampler import Random
+from .random import Random
 from .cheating import Cheating
 from .entropy import Entropy
 from .bald import Bald

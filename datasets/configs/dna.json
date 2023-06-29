@@ -1,7 +1,14 @@
 {
     "n_features": 180,
-    "n_instances": 3186,
-    "n_labeled":100,
-    "pool_size":2000,
-    "n_targets": 3
+    "n_instances": 3186, 
+    "n_labeled":100, 
+    "train_size":1400,
+    "n_classes": 3,
+    "batch_size": 64,
+    "budget":2000,
+    "clf_metrics": {
+        "MulticlassAccuracy": {
+            "num_classes": 3
+        }
+    }
 }
