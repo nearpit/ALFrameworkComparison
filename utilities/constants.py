@@ -40,5 +40,5 @@ OPTUNA_PRUNER = {"name": "MedianPruner",
 OPTUNA_SAMPLER = {"name": "TPESampler",
                   "configs": {}}   
 # DEBUG PARAMS
-# EPOCHS = 500
+EPOCHS = 50
 TOTAL_TRIALS = 2

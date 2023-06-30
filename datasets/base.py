@@ -79,6 +79,7 @@ class VectoralDataset(Dataset):
            
         return data
 
+    @classmethod
     def _split(self, array_size, shares=[0.6, 0.2]):
         indices = np.arange(array_size)
         idx_to_split = (np.cumsum(shares)*array_size).astype(int)

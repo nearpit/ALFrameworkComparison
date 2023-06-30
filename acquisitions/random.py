@@ -6,4 +6,4 @@ class Random(Strategy):
         super().__init__(*args, **kwargs)
     
     def get_scores(self):
-        return np.random.random(self.idx_ulb)
+        return np.random.random(len(self.idx_ulb))

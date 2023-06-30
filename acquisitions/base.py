@@ -90,6 +90,7 @@ class Strategy:
         self.idx_lb = np.append(self.idx_lb, idx)
         assert len(self.idx_ulb)
     
+    
     def get_labeled(self):
         return self.train_dataset[self.idx_lb]
     
