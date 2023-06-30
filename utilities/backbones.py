@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 import utilities.constants as cnst
 
-class MLP(nn.Module):
+class NN(nn.Module):
     def __init__(self,
                  device,
                  layers_size,
@@ -16,7 +16,8 @@ class MLP(nn.Module):
                  weight_decay,
                  batch_size, 
                  optimizer,
-                 early_stop=True,
+                 early_stop,
+                 mc_droprate=0.2, # there is no droprate during training - only for bald within predictions
                  *args, **kwargs):
         
         super().__init__(*args, **kwargs)
@@ -24,7 +25,7 @@ class MLP(nn.Module):
         self.layers = nn.Sequential()
         
         for idx, _ in enumerate(layers_size[:-1]):
-            self.layers.add_module(f"dropout_{idx}", nn.Dropout(cnst.DROPOUT_RATE))
+            self.layers.add_module(f"dropout_{idx}", nn.Dropout(mc_droprate))
             self.layers.add_module(f"dense_{idx}", nn.Linear(layers_size[idx], layers_size[idx + 1]))
             if idx < len(layers_size) - 2: # to avoid adding extra activation in the output layer
                 self.layers.add_module(f"activation_{idx+1}", nn.ReLU())
@@ -42,7 +43,8 @@ class MLP(nn.Module):
     
 
 class EarlyStopper:
-    def __init__(self, patience=1, min_delta=0):
+
+    def __init__(self, patience=50, min_delta=0):
         self.patience = patience
         self.min_delta = min_delta
         self.counter = 0

@@ -32,7 +32,7 @@ class Toy(VectoralDataset):
 
     def split(self, data):
         x, y = data["x"], data["y"]
-        train_idx, val_idx, test_idx = self._split(x.shape[0])
+        train_idx, val_idx, test_idx = self.conv_split(x.shape[0])
 
         return {"train": {"x":x[train_idx], "y":y[train_idx]}, 
                 "val": {"x":x[val_idx], "y":y[val_idx]},

@@ -6,7 +6,7 @@
     "n_classes": 3,
     "batch_size": 8,
     "budget":300,
-    "clf_metrics": {
+    "upstream_metrics": {
         "MulticlassAccuracy": {
             "num_classes": 3
         }

@@ -7,7 +7,7 @@ from acquisitions import Strategy
 from utilities import constants as cnst
 
 class Cheating(Strategy):
-    def __init__(self, sample_size=20, *args, **kwargs):
+    def __init__(self, sample_size=5, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.sample_size = sample_size
     
@@ -21,11 +21,11 @@ class Cheating(Strategy):
         torch.save(self.upstream_model.state_dict(), model_path)
 
         for candidate in batch:
-            self.upstream_model = self.initialize_upstream()
+            self.upstream_model = self.initialize_model(model_name="upstream")
             self.upstream_model.load_state_dict(torch.load(model_path))
-            self.update(candidate)
-            self.train_upstream()
-            loss, accuracy = self.eval('val')
+            self.add_new_inst(candidate)
+            self.train_model(model_name="upstream")
+            loss, accuracy = self.eval_model('val')
             scores[candidate] = 1 / (np.finfo(np.float32).eps + loss) # to revert the loss values in order to align argmax query
             self.idx_lb = self.idx_lb[:-1] # removing just added candidate
         

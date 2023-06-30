@@ -7,15 +7,15 @@ class Bald(Strategy):
         self.forward_passes = forward_passes
     
     def get_scores(self):
-        self.upstream_model.train()        # To enable Dropout 
-        n_classes = self.upstream_configs["layers_size"][-1]
+        self.model.train()        # To enable Dropout 
+        n_classes = self.model_configs["layers_size"][-1]
         total_predictions = torch.empty((0, len(self.idx_ulb), n_classes))
         for _ in range(self.forward_passes):
             with torch.no_grad():
-                probs = self.upstream_model(torch.Tensor(self.train_dataset[self.idx_ulb][0]))
+                probs = self.model(torch.Tensor(self.train_dataset[self.idx_ulb][0]))
             total_predictions = torch.cat((total_predictions, torch.unsqueeze(probs, 0)))
 
-        self.upstream_model.eval()        # To disable Dropout 
+        self.model.eval()        # To disable Dropout 
         
         average_prob =  total_predictions.mean(dim=0)
         total_uncertainty = -(average_prob*torch.log(average_prob)).sum(dim=-1)

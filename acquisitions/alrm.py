@@ -1,7 +1,7 @@
 import torch
 
 from acquisitions import Strategy
-from utilities.dl_backbones import EarlyStopper
+from utilities.backbones import EarlyStopper
 import utilities.constants as cnst
 
 # Active Learning via Reconstruction Model
@@ -17,7 +17,7 @@ class Alrm(Strategy):
         self.train_rm()
         with torch.no_grad():
             inputs = self.get_unlabeled()[0].to(self.device)
-            predictions = self.upstream_model(inputs)
+            predictions = self.model(inputs)
             _, ulb_loss = self.eval_rm("ulb")
 
         meta_input = torch.cat((predictions, ulb_loss))
@@ -37,9 +37,9 @@ class Alrm(Strategy):
                 labels = labels.to(self.device)
                 inputs = inputs.to(self.device)
 
-                predictions = self.upstream_model(inputs)
+                predictions = self.model(inputs)
 
-                batch_loss = self.upstream_model.criterion(predictions, labels)
+                batch_loss = self.model.criterion(predictions, labels)
                 total_loss += batch_loss.item()
                 metric.update(input=predictions.ravel(), target=labels.ravel())
         return total_loss, metric.compute().item()
@@ -47,7 +47,7 @@ class Alrm(Strategy):
     def train_rm(self):
         self.rm.eval()
         
-        early_stopper = EarlyStopper(patience=cnst.PATIENCE, min_delta=cnst.MIN_DELTA)
+        early_stopper = EarlyStopper()
 
         for _ in range(self.epochs):
             total_loss_train = 0
@@ -55,7 +55,7 @@ class Alrm(Strategy):
             train_metric =  self.rm.metric(device=self.device)
             val_metric =  self.rm.metric(device=self.device)
 
-            for inputs, labels in self.lb_loader:
+            for inputs, labels in self.train_loader:
 
                 inputs = torch.cat((inputs, labels), dim=-1)
                 labels = inputs.clone()

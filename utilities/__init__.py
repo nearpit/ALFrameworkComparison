@@ -1,2 +1,3 @@
-from .dl_backbones import MLP, EarlyStopper
+from .backbones import NN, EarlyStopper
 from utilities import constants as cnst
+from tuner import Tuner

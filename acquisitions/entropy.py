@@ -7,7 +7,7 @@ class Entropy(Strategy):
     
     def get_scores(self):
         with torch.no_grad():
-            probs = self.upstream_model(torch.Tensor(self.train_dataset[self.idx_ulb][0]))
+            probs = self.model(torch.Tensor(self.train_dataset[self.idx_ulb][0]))
         log_probs = torch.log(probs)
         U = -(probs*log_probs).sum(axis=1)
         return U
