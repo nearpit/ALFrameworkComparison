@@ -1,4 +1,5 @@
 # Active Learning via Reconstruction Models (ALRM)
+
 ## Installation
 
 ```
@@ -8,8 +9,6 @@ git clone https://github.com/Nearpit/ALRM.git
 cd ALRM
 pip install .
 ```
-
-
 
 ### To add a new acquisition function
 
@@ -32,8 +31,8 @@ pip install .
    7. __budget__ - the amount of AL iterations (0 < x < train_size - n_labeled)
    8. __upstream_metrics__ - metrics of the classifier
 
-
 ### \#TODO
+
 - [ ] Keychain batch learning
 - [ ] Keychain max sample size
 - [ ] Keychain forward passes
