@@ -14,13 +14,13 @@ pip install .
 
 1. Add a new class to the _acquisition_ folder inhereting some of the _base_ classes.
 2. Add the relative name for the `--a` argument.
-3. Import the added entity to the _\_\_init\_\_.py_ file in the _acquisition_ folder.
+3. Import the added class to the _\_\_init\_\_.py_ file in the _acquisition_ folder.
 
 ### To add a new dataset
 
 1. Add a new class to the _dataset_ folder inhereting some of the _base_ classes.
 2. Add the relative name for the `--d` argument.
-3. Import the added entity to the _\_\_init\_\_.py_ file in the _acquisition_ folder.
+3. Import the added class to the _\_\_init\_\_.py_ file in the _acquisition_ folder.
 4. Initialize json file in the _dataset/configs_ folder (see example.json)
    1. __n_features__ - the number of features of the added dataset
    2. __n_instances__ - the number of instances of the added dataset
