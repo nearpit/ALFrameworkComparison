@@ -1,5 +1,3 @@
-RANDOM_STATE = 42
-
 # Active Learning
 HINDERED_ITERATIONS = 10 
 

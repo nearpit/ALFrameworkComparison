@@ -14,27 +14,29 @@ if __name__ == '__main__':
             "val": Dataclass(split_name="val"),
             "test": Dataclass(split_name="test")}
 
-    np.random.seed(cnst.RANDOM_STATE)
+    np.random.seed(args.random_seed)
     idx_lb = np.random.choice(Dataclass.configs["train_size"], size=Dataclass.configs["n_labeled"], replace=False)
     performance = []
 
-    acq_model = Acqclass(data=data, idx_lb=idx_lb)
+    acq_model = Acqclass(data=data, idx_lb=idx_lb, random_seed=args.random_seed)
     
     retuner = EarlyStopper(patience=cnst.HINDERED_ITERATIONS)
 
     new_hypers = acq_model.tuner()
     acq_model.update_model_configs(new_hypers)
+    idx_cand = -1
 
     for idx in range(Dataclass.configs["budget"]):
 
         acq_model.train_model()
-        test_performance = acq_model.eval_model("test")
-        val_performance = acq_model.eval_model("val")
+        val_performance, test_performance = acq_model.eval_model("val"), acq_model.eval_model("test")
         performance.append(test_performance)
-        idx_cand = acq_model.query()
-        acq_model.add_new_inst(idx_cand)
+       
 
         print(val_performance, test_performance, idx_cand, len(acq_model.idx_lb), len(acq_model.idx_ulb))
+
+        idx_cand = acq_model.query()
+        acq_model.add_new_inst(idx_cand)
 
         if retuner.early_stop(val_performance[0]): # if training is hindered
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!NEW UPSTREAM HYPERS WERE REQUESTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")

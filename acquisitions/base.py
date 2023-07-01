@@ -11,7 +11,7 @@ from utilities.backbones import EarlyStopper, NN
 class Strategy:
 
     #DEBUG
-    epochs=100
+    epochs=500
 
     model = None
     model_class = NN
@@ -25,10 +25,11 @@ class Strategy:
     def __init__(self, 
                  data,
                  idx_lb,
+                 random_seed,
                  model_arch_name="MLP"):
         
         # Reproducibility
-        torch.manual_seed(cnst.RANDOM_STATE)
+        torch.manual_seed(random_seed)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.data_configs = data["train"].configs
@@ -48,7 +49,8 @@ class Strategy:
         self.idx_lb = idx_lb
         
         self.model_arch_name = model_arch_name
-        self.tuner = Tuner(parent=self)
+        self.tuner = Tuner(parent=self, random_seed=random_seed)
+        self.random_seed = random_seed
 
 
     @property

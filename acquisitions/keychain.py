@@ -14,51 +14,30 @@ from datasets import VectoralDataset
 
 class Keychain(Strategy):
 
-    downstream_arch = NN
-    first_run = True
-    retuner = EarlyStopper(patience=cnst.HINDERED_ITERATIONS)
+    meta_arch = NN
 
     def __init__(self, buffer_capacity=10, forward_passes=10, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.forward_passes = forward_passes
         self.buffer = ReplayBuffer(buffer_capacity)
-        self.downstream_configs = self.model_configs.copy()
 
 
 
     def get_scores(self):
-        val_performance = self.eval_model(split_name="val", model_name="upstream")
-
-        self.collect_downstream_data()
-        if self.retuner.early_stop(val_performance[0]) or self.first_run: # if training is hindered
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!NEW DOWNSTREAM HYPERS WERE REQUESTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            self.tune_downstream()
-            self.first_run = False
+        self.keychain_iteration()
+        new_hypers = self.meta_acq.tuner()
+        self.meta_acq.update_model_configs(new_hypers)
         
-        self.reset_model("downstream")
-        self.train_model(model_name="downstream")
+        self.meta_acq.train_model()
 
         x, y = self.get_unlabeled()
         ulb_probs = self.model(torch.Tensor(x))
-        scores = self.downstream_model(ulb_probs)[:, 0]
-        return scores
-
-    
-    def tune_downstream(self):
-        x, y = self.buffer.get_data()
-        train_idx, val_idx = VectoralDataset.conv_split(y.shape[0], shares=[0.8])
-        data = {
-            "train": ReplayDataset(x[train_idx], y[train_idx], data_configs=self.data_configs),
-            "val": ReplayDataset(x[val_idx], y[val_idx], data_configs=self.data_configs)
-        }
-        new_hypers = funcs.hypers_search(data=data, model_arch_name="MLP")
-        self.update_model_configs(new_hypers, "downstream")
-        self.downstream_model = self.initialize_model(model_name="downstream")
-   
+        scores = self.meta_acq.model(ulb_probs)[:, 0] # 0 index is for positive, 1 for negative
+        return scores 
                 
     
-    def collect_downstream_data(self):
-        best_loss, best_metrics = self.eval_model("val", model_name="upstream")
+    def keychain_iteration(self):
+        best_loss, best_metrics = self.eval_model("val")
 
         model_path = os.getcwd() + "/temp/keychain_model"
         torch.save(self.model.state_dict(), model_path)
@@ -68,9 +47,9 @@ class Keychain(Strategy):
         for idx, instance in enumerate(labeled_pool):
             self.idx_lb = np.delete(labeled_pool, idx)
             x, y = self.train_dataset[instance]
-            self.reset_model(model_name="upstream")
-            self.train_model(model_name="upstream")
-            loss, metrics = self.eval_model("val", model_name="upstream")
+            self.reset_model()
+            self.train_model()
+            loss, metrics = self.eval_model("val")
             with torch.no_grad():
                 probs = self.model(torch.Tensor(x))
             inputs.append(probs)
@@ -82,6 +61,20 @@ class Keychain(Strategy):
         self.model.load_state_dict(torch.load(model_path))
 
         self.buffer.push((inputs, targets))
+
+        self.soak_from_buffer()
+
+
+    def soak_from_buffer(self):
+        x, y = self.buffer.get_data()
+        train_idx, val_idx = VectoralDataset.conv_split(y.shape[0], shares=[0.8])
+        data = {
+            "train": ReplayDataset(x[train_idx], y[train_idx], data_configs=self.data_configs),
+            "val": ReplayDataset(x[val_idx], y[val_idx], data_configs=self.data_configs)
+        }
+        
+        # Strategy inception ;D
+        self.meta_acq = Strategy(data=data, idx_lb=np.arange(len(train_idx)), random_seed=self.random_seed) 
 
 class ReplayDataset(Dataset):
 
