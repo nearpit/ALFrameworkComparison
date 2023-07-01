@@ -40,5 +40,5 @@ pip install .
 - [ ] Aggregated latent representations (AE and classifier) of both pools
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (AE and classifier latent repr, AE output, etc.)
-- [ ] Keychain heuristics
+- [ ] Keychain heuristics (ensemble)
 - [ ] Keychain __SUPERIOR__ (Heuristics + above mentioned non-heuristics)
