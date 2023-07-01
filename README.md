@@ -31,4 +31,8 @@ pip install .
 
 
 ### \#TODO
-- [ ] Finish ALRM 
+- [ ] Uncertainty Quantification via AE
+- [ ] Aggregated latent representations (AE and clf) of both pools
+- [ ] Keychain naive
+- [ ] Keychain non-heuristics
+- [ ] Keychain __SUPERIOR__
