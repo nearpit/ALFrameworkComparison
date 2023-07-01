@@ -34,8 +34,8 @@ pip install .
 
 
 ### \#TODO
-- [ ] Uncertainty Quantification via AE
-- [ ] Aggregated latent representations (AE and clf) of both pools
+- [ ] Uncertainty Quantification via Autoencoder(AE)
+- [ ] Aggregated latent representations (AE and classifier) of both pools
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics
 - [ ] Keychain __SUPERIOR__
