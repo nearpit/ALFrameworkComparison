@@ -1,5 +1,3 @@
-import json
-
 from datasets.base import SVMDataset
 from sklearn.preprocessing import FunctionTransformer, OneHotEncoder
 

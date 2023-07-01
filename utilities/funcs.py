@@ -20,4 +20,10 @@ def get_arguments():
                         help="What random seed to use",  
                         type=int,
                         default=42)
+    
+    parser.add_argument("-hi", "--hindered_iters",
+                        help="How many hindered iterations should happen to retune the classifier",
+                        type=int,
+                        default=10)
+    
     return parser.parse_args()

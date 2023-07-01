@@ -2,13 +2,11 @@ import os
 from collections import deque
 
 import torch
-from torch import Tensor
-from torch.utils.data import Dataset, TensorDataset
+from torch.utils.data import Dataset
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-import utilities.constants as cnst
-from utilities import funcs, NN, EarlyStopper
+from utilities import NN
 from acquisitions import Strategy
 from datasets import VectoralDataset
 

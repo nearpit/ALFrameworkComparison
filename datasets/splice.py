@@ -1,6 +1,5 @@
 from datasets.base import SVMDataset
-from sklearn.preprocessing import FunctionTransformer, MinMaxScaler, OneHotEncoder
-from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
 class Splice(SVMDataset):
     # split train for validation

@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader, Subset
 
 import numpy as np
 
-from utilities import Tuner, constants as cnst
+from utilities import Tuner
 from utilities.backbones import EarlyStopper, NN
 
 

@@ -4,7 +4,6 @@ import torch
 import numpy as np
 
 from acquisitions import Strategy
-from utilities import constants as cnst
 
 class Cheating(Strategy):
                        #DEBUG 

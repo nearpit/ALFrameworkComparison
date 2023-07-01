@@ -2,7 +2,6 @@ import torch
 
 from acquisitions import Strategy
 from utilities.backbones import EarlyStopper
-import utilities.constants as cnst
 
 # Active Learning via Reconstruction Model
 class Alrm(Strategy):

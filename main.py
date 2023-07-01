@@ -2,7 +2,7 @@ import numpy as np
 
 import acquisitions
 import datasets
-from utilities import funcs, NN, cnst, EarlyStopper
+from utilities import funcs, EarlyStopper
 
 
 if __name__ == '__main__':
@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     acq_model = Acqclass(data=data, idx_lb=idx_lb, random_seed=args.random_seed)
     
-    retuner = EarlyStopper(patience=cnst.HINDERED_ITERATIONS)
+    retuner = EarlyStopper(patience=args.hindered_iters)
 
     new_hypers = acq_model.tuner()
     acq_model.update_model_configs(new_hypers)
