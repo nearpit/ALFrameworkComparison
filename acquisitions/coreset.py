@@ -2,39 +2,35 @@ import torch
 import numpy as np
 from sklearn.metrics import pairwise_distances
 
-from acquisitions import Strategy
+from acquisitions import Acquisition
+from core import Learnable
 
-class Coreset(Strategy):
+class Coreset(Acquisition):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.latent = None
     
-    @Strategy.hook_penultimate_once    
+    @Learnable.hook_once    
     def get_scores(self):
-        m = self.get_unlabeled()[0].shape[0]
-
-        latent_ulb, latent_lb = self.get_embeddings(self.idx_ulb), self.get_embeddings(self.idx_lb)
+        latent_ulb, latent_lb = self.get_embeddings(self.pool.get("unlabeled")), self.get_embeddings(self.pool.get("labeled"))
 
         pair_distance = pairwise_distances(latent_ulb, latent_lb)
         min_dist = np.amin(pair_distance, axis=1)
 
         return min_dist
 
-    def get_embeddings(self, set_indices):
+    def get_embeddings(self, inputs):
+        x, y = inputs
         with torch.no_grad():
-            self.model(torch.Tensor(self.train_dataset[set_indices][0]))
+            self.clf(torch.Tensor(x))
         return self.latent
     
     def embedding_hook(self):
-        total_layer_depth = len(self.model_configs["layers_size"])
+        # penultimate layer hook
+        total_layer_depth = len(self.clf.model_configs["layers_size"])
         penultimate_layer_name = f"dense_{total_layer_depth - 2}" 
-        penultimate_layer = getattr(self.model.layers, penultimate_layer_name)
+        penultimate_layer = getattr(self.clf.model.layers, penultimate_layer_name)
         penultimate_layer.register_forward_hook(self.get_activation(penultimate_layer_name))
         
-    def get_activation(self, name):
-        def hook(model, input, output):
-            value = torch.clone(output.detach())
-            self.latent = value
-        return hook
+
     
     

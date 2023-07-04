@@ -3,8 +3,6 @@ from torch import nn, optim
 from torcheval import metrics
 from collections import OrderedDict
 
-import utilities.constants as cnst
-
 class NN(nn.Module):
     def __init__(self,
                  device,
@@ -15,8 +13,8 @@ class NN(nn.Module):
                  lr, 
                  weight_decay,
                  batch_size, 
-                 optimizer,
-                 early_stop,
+                 optimizer="SGD",
+                 early_stop=True,
                  mc_droprate=0.2, # there is no droprate during training - only for bald within predictions
                  *args, **kwargs):
         
@@ -44,10 +42,10 @@ class NN(nn.Module):
 
 class EarlyStopper:
 
-    def __init__(self, patience=50, min_delta=0):
+    def __init__(self, patience=50, min_delta=0, starts_with=0):
         self.patience = patience
         self.min_delta = min_delta
-        self.counter = 0
+        self.counter = starts_with
         self.min_validation_loss = float("Inf")
 
     def early_stop(self, validation_loss):
@@ -82,4 +80,3 @@ class MetricsSet:
         results = {key:val.compute().item() for key, val in self.result_dict.items()}
         self.result_dict = None
         return results
-    

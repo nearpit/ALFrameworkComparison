@@ -1,9 +1,9 @@
-from acquisitions import Strategy
+from acquisitions import Acquisition
 import numpy as np
 
-class Random(Strategy):
+class Random(Acquisition):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
     
     def get_scores(self):
-        return np.random.random(len(self.idx_ulb))
+        return np.random.random(self.pool.get_len("unlabeled"))

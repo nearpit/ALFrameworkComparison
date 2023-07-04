@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 
-
 def get_arguments():
     parser = ArgumentParser()
     parser.add_argument("-d", "--dataset",

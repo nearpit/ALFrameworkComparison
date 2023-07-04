@@ -1,15 +1,14 @@
-import utilities.constants as cnst
 from utilities.backbones import EarlyStopper
 import optuna
 
 class BaseClass:
-    def __init__(self, parent):
-        self.parent = parent
-        self.inputs, self.outputs = parent.data["train"].dimensions
+    def __init__(self, pool, model):
+        self.pool = pool
+        self.model = model
 
     def add_input_output_size(self, layers_size):
-        layers_size.insert(0, self.inputs)
-        layers_size.append(self.outputs)
+        layers_size.insert(0, self.pool.n_features)
+        layers_size.append(self.pool.n_classes)
         return layers_size
 
 class Tuner(BaseClass):
@@ -26,12 +25,12 @@ class Tuner(BaseClass):
         self.study_configs["sampler"] = optuna.samplers.TPESampler(seed=random_seed)
 
 
-        self.model_arch_name = self.parent.model_arch_name
+        self.model_arch_name = self.model.model_arch_name
 
     def __call__(self):
         study = optuna.create_study(**self.study_configs)
         #TODO chech the attributes of study and find "Objective" instance there
-        study.optimize(Objective(self.parent), n_trials=self.n_trials)
+        study.optimize(Objective(model=self.model, pool=self.pool), n_trials=self.n_trials)
 
         return self.align_params(study.best_params)
     
@@ -64,7 +63,7 @@ class Objective(BaseClass):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.define_func = getattr(self, f"define_{self.parent.model_arch_name}")
+        self.define_func = getattr(self, f"define_{self.model.model_arch_name}")
 
     def __call__(self, trial):
         suggest_dict = {
@@ -73,9 +72,9 @@ class Objective(BaseClass):
             "layers_size": self.add_input_output_size(self.define_func(trial))
         }
 
-        self.parent.update_model_configs(suggest_dict)
-        self.parent.train_model(trial=trial)
-        loss, metrics = self.parent.eval_model("val")
+        self.model.update_model_configs(suggest_dict)
+        self.model.train_model(trial=trial)
+        loss, metrics = self.model.eval_model("val")
         return loss
 
     def define_MLP(self, trial):

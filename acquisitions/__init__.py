@@ -1,4 +1,4 @@
-from .base import Strategy
+from .base import Acquisition
 from .random import Random
 from .cheating import Cheating
 from .entropy import Entropy

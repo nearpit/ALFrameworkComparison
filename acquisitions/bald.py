@@ -1,21 +1,21 @@
-from acquisitions import Strategy
+from acquisitions import Acquisition
 import torch
 
-class Bald(Strategy):
+class Bald(Acquisition):
     def __init__(self, forward_passes=100, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.forward_passes = forward_passes
     
     def get_scores(self):
-        self.model.train()        # To enable Dropout 
-        n_classes = self.model_configs["layers_size"][-1]
-        total_predictions = torch.empty((0, len(self.idx_ulb), n_classes))
+        self.clf.model.train()        # To enable Dropout 
+        total_predictions = torch.empty((0, self.pool.get_len("unlabeled"), self.pool.n_classes))
+        x, y = self.pool.get("unlabeled")
         for _ in range(self.forward_passes):
             with torch.no_grad():
-                probs = self.model(torch.Tensor(self.train_dataset[self.idx_ulb][0]))
+                probs = self.clf(torch.Tensor(x))
             total_predictions = torch.cat((total_predictions, torch.unsqueeze(probs, 0)))
 
-        self.model.eval()        # To disable Dropout 
+        self.clf.model.eval()        # To disable Dropout 
         
         average_prob =  total_predictions.mean(dim=0)
         total_uncertainty = -(average_prob*torch.log(average_prob)).sum(dim=-1)

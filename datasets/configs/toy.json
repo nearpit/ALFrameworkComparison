@@ -7,7 +7,7 @@
     "n_classes": 2,
     "batch_size": 8,
     "budget":300,
-    "upstream_metrics": {
+    "metrics": {
         "MulticlassAccuracy": {
             "num_classes": 2
         }

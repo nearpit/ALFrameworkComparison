@@ -4,7 +4,6 @@ from sklearn.datasets import make_blobs
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 
 from datasets.base import VectoralDataset
-import utilities.constants as cnst
 
 class Toy(VectoralDataset):
 

@@ -3,29 +3,31 @@ import os
 import torch
 import numpy as np
 
-from acquisitions import Strategy
+from acquisitions import Acquisition
 
-class Cheating(Strategy):
+class Cheating(Acquisition):
                        #DEBUG 
     def __init__(self, sample_size=20, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.sample_size = sample_size
     
     def get_scores(self):
-        batch = np.random.choice(self.idx_ulb, self.sample_size, replace=False)
-        scores = np.full((len(self.idx_intact)), float("-inf"))
+        batch = np.random.choice(self.pool.idx_ulb, self.sample_size, replace=False)
+        scores = np.full(self.pool.get_len(), float("-inf"))
         model_path = os.getcwd() + "/temp/"
         if not os.path.exists(model_path):
             os.mkdir(model_path)
         model_path +=  "/oracle_model"
-        torch.save(self.model.state_dict(), model_path)
+        torch.save(self.clf.model.state_dict(), model_path)
 
         for candidate in batch:
-            self.reset_model()
-            self.add_new_inst(candidate)
-            self.train_model()
-            loss, accuracy = self.eval_model('val')
+            self.clf.reset_model()
+            self.pool.add_new_inst(candidate)
+            self.clf.train_model()
+            loss, accuracy = self.clf.eval_model('val')
             scores[candidate] = -loss # to revert the loss values in order to align argmax query
-            self.idx_lb = self.idx_lb[:-1] # removing just added candidate
+            self.pool.idx_lb = self.pool.idx_lb[:-1] # removing just added candidate
         
-        return scores[self.idx_ulb]
+        self.clf.model.load_state_dict(torch.load(model_path)) # restoring the initial params
+
+        return scores[self.pool.idx_ulb]

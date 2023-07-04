@@ -6,7 +6,6 @@ import requests
 from torch.utils.data import Dataset
 from sklearn.datasets import load_svmlight_file
 
-
 class VectoralDataset(Dataset):
 
     dataset_name = None
@@ -45,12 +44,7 @@ class VectoralDataset(Dataset):
         
     def __getitem__(self, idx):
         return self.x[idx], self.y[idx]
-
-    # return input and output dimensions
-    @property
-    def dimensions(self):
-        return self.x.shape[1], self.y.shape[1]
-    
+  
     def file_exists(self):
         splits = ["train.npz", "val.npz", "test.npz"]
         existed_files = os.listdir(self.location)
@@ -112,3 +106,24 @@ class SVMDataset(VectoralDataset):
             os.remove(file_path)
         
         return data
+    
+class ReplayDataset(Dataset):
+
+    def __init__(self, x, y, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.x = x
+        self.y = y
+        self.configs = {
+            "train_size": len(x),
+            "n_labeled" : len(x),
+            "batch_size": 8,
+            "metrics": {},
+            "n_features": x.shape[1],
+            "n_classes": y.shape[1]
+        }
+   
+    def __len__(self):
+         return self.x.shape[0]
+        
+    def __getitem__(self, idx):
+        return self.x[idx], self.y[idx]
