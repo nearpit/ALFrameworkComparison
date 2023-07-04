@@ -29,7 +29,7 @@ pip install .
    5. __n_classes__ - the number of classes of the target space
    6. __batch_size__ (x < n_labeled)
    7. __budget__ - the amount of AL iterations (0 < x < train_size - n_labeled)
-   8. __upstream_metrics__ - metrics of the classifier
+   8. __metrics__ - metrics of the classifier
 
 ### \#TODO
 
