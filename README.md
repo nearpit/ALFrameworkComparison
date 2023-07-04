@@ -36,9 +36,9 @@ pip install .
 - [ ] Keychain batch learning
 - [ ] Keychain max sample size
 - [ ] Keychain forward passes
-- [ ] Uncertainty Quantification via Autoencoder(AE)
-- [ ] Aggregated latent representations (AE and classifier) of both pools
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (AE and classifier latent repr, AE output, etc.)
 - [ ] ? Keychain heuristics (ensemble)
 - [ ] Keychain __SUPERIOR__ (Heuristics + above mentioned non-heuristics)
+- [ ] Uncertainty Quantification via Autoencoder(AE)
+- [ ] Aggregated latent representations (AE and classifier) of both pools
