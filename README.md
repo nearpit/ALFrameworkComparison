@@ -33,7 +33,7 @@ pip install .
 
 ### \#TODO
 
-- [ ] Keychain forward passes
+- [ ] Keychain transform targets
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (AE and classifier latent repr, AE output, etc.)
 - [ ] ? Keychain heuristics (ensemble)

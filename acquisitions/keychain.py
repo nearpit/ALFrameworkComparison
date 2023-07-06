@@ -2,9 +2,9 @@ import os
 
 import torch
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, FunctionTransformer
 
-from utilities import NN, ReplayBuffer
+from utilities import NN, ReplayBuffer, OnlineAvg
 from datasets import VectoralDataset, ReplayDataset
 from acquisitions import Acquisition
 from core import Learnable, Pool
@@ -13,22 +13,25 @@ class Keychain(Acquisition):
 
     meta_arch = NN
 
-    def __init__(self, buffer_capacity=5, forward_passes=5, *args, **kwargs):
+    def __init__(self, buffer_capacity=5, n_samples=30, batch_share=0.2, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.forward_passes = forward_passes
+        self.n_samples = n_samples
+        self.batch_share = batch_share
         self.buffer = ReplayBuffer(buffer_capacity)
         self.feature_encoder = MinMaxScaler
+        self.target_encoder = MinMaxScaler
 
     def get_scores(self):
         self.keychain_iteration()
         self.meta_acq.train_model()
         x, y = self.pool.get("unlabeled")
-        inputs = self.preprocess(self.collect_inputs(x))
-        scores = self.meta_acq(torch.Tensor(inputs))
+        inputs = self.preprocess(self.collect_inputs(x), self.feature_encoder())
+        with torch.no_grad():
+            scores = self.meta_acq(inputs)
         return scores[:, 0] 
     
-    def preprocess(self, x):
-        x_transformed = self.feature_encoder().fit_transform(x)
+    def preprocess(self, x, encoder):
+        x_transformed = encoder.fit_transform(x)
         return torch.from_numpy(x_transformed)
            
     def collect_inputs(self, x):
@@ -43,25 +46,29 @@ class Keychain(Acquisition):
 
         model_path = os.getcwd() + "/temp/keychain_model"
         torch.save(self.clf.model.state_dict(), model_path)
-        inputs, targets = [], []
-        labeled_pool = self.pool.idx_lb.copy()
 
-        for idx, instance in enumerate(labeled_pool):
-            self.pool.idx_lb = np.delete(labeled_pool, idx)
-            x, y = self.pool.data["train"][instance]           
+        targets = np.vectorize(lambda x: OnlineAvg())(np.zeros((self.pool.get_len("labeled"), 1)))
+        labeled_pool = self.pool.idx_lb.copy()
+        relative_idx = np.arange(self.pool.get_len("labeled"))
+        for _ in range(self.n_samples):
+            temp_removed = np.random.choice(relative_idx, int(len(labeled_pool)*self.batch_share), replace=False)
+            self.pool.idx_lb = np.delete(labeled_pool, temp_removed)
             self.clf.reset_model()
             self.clf.train_model()
-            inputs.append(self.collect_inputs(x))
 
             loss, metrics = self.clf.eval_model("val")
-            targets.append(np.array([max(0, loss - best_loss)]))
+            targets[temp_removed] += max(0, loss - best_loss)
 
             self.pool.idx_lb = labeled_pool.copy()
-
+        
 
         self.clf.model.load_state_dict(torch.load(model_path))
+        
+        x, y = self.pool.get("labeled")
+        inputs = self.preprocess(self.collect_inputs(x), self.feature_encoder())
+        targets = self.preprocess(targets.astype(np.float32), self.target_encoder())
 
-        self.buffer.push((self.preprocess(inputs), targets))
+        self.buffer.push((inputs, targets))
 
         self.soak_from_buffer()
 
