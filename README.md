@@ -33,6 +33,7 @@ pip install .
 
 ### \#TODO
 
+- [ ] Margin Acq
 - [ ] Keychain batch learning
 - [ ] Keychain max sample size
 - [ ] Keychain forward passes
