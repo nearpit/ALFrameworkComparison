@@ -15,7 +15,7 @@ class NN(nn.Module):
                  batch_size, 
                  optimizer="SGD",
                  early_stop=True,
-                 mc_droprate=0.2, # there is no droprate during training - only for bald within predictions
+                 mc_droprate=0.2, # there is no droprate during training - only for BALD within predictions
                  *args, **kwargs):
         
         super().__init__(*args, **kwargs)

@@ -35,7 +35,7 @@ class Pool:
         return DataLoader(Subset(self.data['train'], self.idx_lb), 
                           batch_size=self.batch_size, 
                           shuffle=True, 
-                          drop_last=True)
+                          drop_last=False)
     
     def add_new_inst(self, idx):
         self.idx_lb = np.append(self.idx_lb, idx)

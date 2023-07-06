@@ -11,26 +11,29 @@ class Learnable:
 
     model = None
     model_class = NN
-    model_configs = {"MLP": {"last_activation": "Softmax",
+    model_configs = {"MLP_clf": {"last_activation": "Softmax",
                               "criterion": "CrossEntropyLoss"},
+                     "MLP_reg": {"last_activation": "Identity",
+                                 "criterion": "MSELoss"},
                      "AE": {"last_activation": "Identity",
                             "criterion": "MSELoss"}}
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tuner_configs = {
-        "n_trials": 3 #DEBUG
-        }
+    tuner_configs = {"n_trials": 3} #DEBUG
+
 
 
     def __init__(self, 
                  pool,
                  random_seed,
-                 model_arch_name="MLP"):
+                 model_arch_name="MLP_clf"):
+        
+        self.random_seed = random_seed
         # Reproducibility
         torch.manual_seed(random_seed)
         self.tuner_configs["random_seed"] = random_seed
         self.pool = pool
-        self.model_configs = self.model_configs[model_arch_name]
-        self.model_configs.update({"metrics_dict":pool.metrics,
+        self.model_configs = self.model_configs[model_arch_name].copy()
+        self.model_configs.update({"metrics_dict":pool.metrics_dict,
                                    "batch_size":pool.batch_size})
         self.model_arch_name = model_arch_name
         self.tune_model()
@@ -117,10 +120,14 @@ class Learnable:
             if early_stopper.early_stop(val_loss):
                 break
 
-    def reset_model(self):
+    def reset_model(self, seed=None):
+        if seed is None:
+            seed = self.random_seed
+        torch.manual_seed(seed)
         for seq in self.model.children():
             for layer in seq.modules():
                 if hasattr(layer, 'reset_parameters'):
                     layer.reset_parameters()
     def tune_model(self):
         self.update_model_configs(Tuner(pool=self.pool, model=self, **self.tuner_configs)())
+        self.train_model()

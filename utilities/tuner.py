@@ -24,7 +24,6 @@ class Tuner(BaseClass):
         self.study_configs["direction"] = direction
         self.study_configs["sampler"] = optuna.samplers.TPESampler(seed=random_seed)
 
-        self.model_arch_name = self.model.model_arch_name
 
     def __call__(self):
         study = optuna.create_study(**self.study_configs)
@@ -44,7 +43,7 @@ class Tuner(BaseClass):
         layers_size = []
         for idx, _ in enumerate(width_dict.keys()):
             layers_size.append(width_dict[f"width_{idx}"])
-        if self.model_arch_name == "AE":
+        if self.model.model_arch_name  == "AE":
             # TODO check whether it works correctly
             layers_size.extend(layers_size[1::-1])
         
@@ -55,14 +54,17 @@ class Tuner(BaseClass):
 class Objective(BaseClass):
     suggest_params = {
         "decay": {"low": 1e-8, "high":1e-3, "log":True},
-        "depth": {"low": 1, "high":5},
+        "depth": {"low": 1, "high":4},
         "width": {"low": 4, "high": 92},
         "lr": {"low": 1e-6, "high":1e-1}
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.define_func = getattr(self, f"define_{self.model.model_arch_name}")
+        if "MLP" in self.model.model_arch_name:
+            self.define_func = self.define_MLP
+        elif "AE" in self.model.model_arch_name:
+            self.define_func = self.define_AE
 
     def __call__(self, trial):
         suggest_dict = {

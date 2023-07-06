@@ -116,8 +116,8 @@ class ReplayDataset(Dataset):
         self.configs = {
             "train_size": len(x),
             "n_labeled" : len(x),
-            "batch_size": 8,
-            "metrics": {},
+            "batch_size": 32,
+            "metrics_dict": {},
             "n_features": x.shape[1],
             "n_classes": y.shape[1]
         }

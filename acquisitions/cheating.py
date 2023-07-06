@@ -21,6 +21,7 @@ class Cheating(Acquisition):
         torch.save(self.clf.model.state_dict(), model_path)
 
         for candidate in batch:
+            torch.manual_seed(self.random_seed)
             self.clf.reset_model()
             self.pool.add_new_inst(candidate)
             self.clf.train_model()
