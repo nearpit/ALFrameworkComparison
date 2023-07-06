@@ -1,11 +1,11 @@
 {
     "n_features": 60,
     "n_instances": 3175, 
-    "n_labeled":64, 
+    "n_labeled": 10, 
     "train_size":600,
     "n_classes": 2,
-    "batch_size": 32,
-    "budget":2000,
+    "batch_size": 8,
+    "budget": 400,
     "metrics": {
         "MulticlassAccuracy": {
             "num_classes": 2

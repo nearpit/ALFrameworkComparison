@@ -14,7 +14,8 @@ def get_arguments():
                                  "keychain",
                                  "bald", 
                                  "coreset",
-                                 "entropy"])
+                                 "entropy",
+                                 "margin"])
     parser.add_argument("-r", "--random_seed",
                         help="What random seed to use",  
                         type=int,

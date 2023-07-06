@@ -24,7 +24,6 @@ class Tuner(BaseClass):
         self.study_configs["direction"] = direction
         self.study_configs["sampler"] = optuna.samplers.TPESampler(seed=random_seed)
 
-
         self.model_arch_name = self.model.model_arch_name
 
     def __call__(self):
@@ -55,10 +54,10 @@ class Tuner(BaseClass):
 
 class Objective(BaseClass):
     suggest_params = {
-        "decay": {"low": 1e-7, "high":1e-1, "log":True},
+        "decay": {"low": 1e-8, "high":1e-3, "log":True},
         "depth": {"low": 1, "high":5},
         "width": {"low": 4, "high": 92},
-        "lr": {"low": 1e-4, "high":1e-1}
+        "lr": {"low": 1e-6, "high":1e-1}
         }
 
     def __init__(self, *args, **kwargs):
