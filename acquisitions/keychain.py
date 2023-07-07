@@ -13,13 +13,13 @@ class Keychain(Acquisition):
 
     meta_arch = NN
 
-    def __init__(self, buffer_capacity=5, n_samples=30, batch_share=0.2, *args, **kwargs):
+    def __init__(self, buffer_capacity=5, n_samples=40, batch_share=0.3, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.n_samples = n_samples
         self.batch_share = batch_share
         self.buffer = ReplayBuffer(buffer_capacity)
-        self.feature_encoder = MinMaxScaler
-        self.target_encoder = MinMaxScaler
+        self.feature_encoder = FunctionTransformer
+        self.target_encoder = FunctionTransformer
 
     def get_scores(self):
         self.keychain_iteration()
@@ -47,7 +47,7 @@ class Keychain(Acquisition):
         model_path = os.getcwd() + "/temp/keychain_model"
         torch.save(self.clf.model.state_dict(), model_path)
 
-        targets = np.vectorize(lambda x: OnlineAvg())(np.zeros((self.pool.get_len("labeled"), 1)))
+        raw_targets = np.vectorize(lambda x: OnlineAvg())(np.zeros((self.pool.get_len("labeled"), 1)))
         labeled_pool = self.pool.idx_lb.copy()
         relative_idx = np.arange(self.pool.get_len("labeled"))
         for _ in range(self.n_samples):
@@ -57,7 +57,7 @@ class Keychain(Acquisition):
             self.clf.train_model()
 
             loss, metrics = self.clf.eval_model("val")
-            targets[temp_removed] += max(0, loss - best_loss)
+            raw_targets[temp_removed] += max(0, loss - best_loss)
 
             self.pool.idx_lb = labeled_pool.copy()
         
@@ -65,8 +65,8 @@ class Keychain(Acquisition):
         self.clf.model.load_state_dict(torch.load(model_path))
         
         x, y = self.pool.get("labeled")
-        inputs = self.preprocess(self.collect_inputs(x), self.feature_encoder())
-        targets = self.preprocess(targets.astype(np.float32), self.target_encoder())
+        inputs = self.preprocess(self.collect_inputs(x), self.feature_encoder(lambda x: x))
+        targets = self.preprocess(raw_targets.astype(np.float32), self.target_encoder(lambda x: x))
 
         self.buffer.push((inputs, targets))
 

@@ -1,3 +1,5 @@
+import pickle
+import os
 from argparse import ArgumentParser
 
 def get_arguments():
@@ -27,3 +29,14 @@ def get_arguments():
                         default=10)
     
     return parser.parse_args()
+
+
+
+def store_results(array, filename):
+ 
+    path = "results/"
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    with open(f'{path}{filename}.pkl', 'wb') as file:
+        pickle.dump(array, file)

@@ -1,3 +1,4 @@
+import logging
 import acquisitions, datasets, core, utilities
 
 
@@ -6,6 +7,7 @@ class ActiveLearning:
         Dataclass = getattr(datasets, args.dataset.capitalize())
         self.budget = Dataclass.configs["budget"]
         self.random_seed = args.random_seed
+        self.args = args
         Acqclass = getattr(acquisitions, args.algorithm.capitalize())
 
         self.pool = core.Pool(data=self.get_data_dict(Dataclass), random_seed=args.random_seed)
@@ -13,6 +15,8 @@ class ActiveLearning:
         self.acq = Acqclass(clf=self.clf, pool=self.pool, random_seed=args.random_seed)
         self.retuner = utilities.EarlyStopper(patience=args.hindered_iters)
         self.last_cand = -1
+        self.val_perf = None
+        self.test_perf = None
 
 
     def get_data_dict(self, Dataclass):
@@ -21,17 +25,49 @@ class ActiveLearning:
                 "test": Dataclass(split_name="test")}
 
     def run(self):
-        last_labeled = -1
-        for idx in range(self.budget):
-            val_perf, test_perf = self.clf.eval_model("val"), self.clf.eval_model("test")
-            print(val_perf, test_perf, last_labeled, self.pool.get_len("labeled"), self.pool.get_len("unlabeled"))
+        retuned = []
+        results = []
+        for idx in range(self.budget + 1):
+            self.val_perf, self.test_perf = self.clf.eval_model("val"), self.clf.eval_model("test")
+            logging.warning(f'{self.val_perf} {self.test_perf} {self.last_cand} {self.pool.get_len("labeled")} {self.pool.get_len("unlabeled")}')
 
-            if self.retuner.early_stop(val_perf[0]): # if training is hindered
-                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!NEW UPSTREAM HYPERS WERE REQUESTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+            if self.retuner.early_stop(self.val_perf[0]): # if training is hindered
+                logging.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!NEW UPSTREAM HYPERS WERE REQUESTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 self.clf.tune_model()
+                retuned.append(idx)
+                utilities.store_results(retuned, self.get_name(self.args) + "_retuned")
 
-            last_labeled = self.acq.query()
-            self.pool.add_new_inst(last_labeled)
+             # LOGGINGS
+            results.append(self.gather_results(idx))
+            utilities.store_results(results, self.get_name(self.args))
+
+            self.last_cand = self.acq.query()
+            self.pool.add_new_inst(self.last_cand)
+
+            
 
             self.clf.reset_model()
             self.clf.train_model()
+
+           
+
+
+
+    def gather_results(self, iter):
+        return {
+            "dataset": self.args.dataset,
+            "algorithm": self.args.algorithm,
+            "random_seed": self.args.random_seed,
+            "last_cand": self.last_cand,
+            "test_loss": self.test_perf[0],
+            "test_acc": self.test_perf[1]["MulticlassAccuracy"],
+            "val_loss": self.val_perf[0],
+            "val_acc": self.val_perf[1]["MulticlassAccuracy"],
+            "len_ulb": self.pool.get_len("unlabeled"),
+            "len_lb": self.pool.get_len("labeled"), 
+            "iter": iter
+        }
+    
+    def get_name(self, args):
+        return f"{args.dataset}_{args.algorithm}_{args.random_seed}"

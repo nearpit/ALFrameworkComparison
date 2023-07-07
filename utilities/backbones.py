@@ -1,13 +1,12 @@
-import torch
 from torch import nn, optim
 from torcheval import metrics
-from collections import OrderedDict
 
 class NN(nn.Module):
     def __init__(self,
                  device,
                  layers_size,
                  last_activation,
+                 last_activation_configs,
                  metrics_dict,
                  criterion, 
                  lr, 
@@ -27,7 +26,7 @@ class NN(nn.Module):
             self.layers.add_module(f"dense_{idx}", nn.Linear(layers_size[idx], layers_size[idx + 1]))
             if idx < len(layers_size) - 2: # to avoid adding extra activation in the output layer
                 self.layers.add_module(f"activation_{idx+1}", nn.ReLU())
-        self.layers.add_module("last_activation", getattr(nn, last_activation)(dim=-1))
+        self.layers.add_module("last_activation", getattr(nn, last_activation)(**last_activation_configs))
         self.metrics_dict = metrics_dict
         self.metrics_set = MetricsSet(metrics_dict=metrics_dict, device=device)
         self.optimizer = getattr(optim, optimizer)(self.parameters(), lr=lr, weight_decay=weight_decay)

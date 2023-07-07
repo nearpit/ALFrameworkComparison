@@ -19,7 +19,7 @@ class Tuner(BaseClass):
     #CAVEAT check the objective direction    #DEBUG
     def __init__(self, random_seed, direction="minimize", n_trials = 5, *args, **kwargs):    
         super().__init__(*args, **kwargs)
-        optuna.logging.set_verbosity(optuna.logging.WARNING) #DEBUG
+        # optuna.logging.set_verbosity(optuna.logging.WARNING) #DEBUG
         self.n_trials = n_trials  
         self.study_configs["direction"] = direction
         self.study_configs["sampler"] = optuna.samplers.TPESampler(seed=random_seed)

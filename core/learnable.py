@@ -1,6 +1,6 @@
-from typing import Any
 import torch
 import optuna
+from torch import nn
 
 from utilities import NN, EarlyStopper, Tuner
 
@@ -12,13 +12,16 @@ class Learnable:
     model = None
     model_class = NN
     model_configs = {"MLP_clf": {"last_activation": "Softmax",
-                              "criterion": "CrossEntropyLoss"},
+                                 "last_activation_configs": {"dim":-1},
+                                 "criterion": "CrossEntropyLoss"},
                      "MLP_reg": {"last_activation": "Identity",
+                                 "last_activation_configs": {},
                                  "criterion": "MSELoss"},
                      "AE": {"last_activation": "Identity",
+                            "last_activation_configs": {},
                             "criterion": "MSELoss"}}
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tuner_configs = {"n_trials": 3} #DEBUG
+    tuner_configs = {"n_trials": 200} #DEBUG
 
 
 

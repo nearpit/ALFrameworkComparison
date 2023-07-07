@@ -7,7 +7,7 @@ from acquisitions import Acquisition
 
 class Cheating(Acquisition):
                        #DEBUG 
-    def __init__(self, sample_size=20, *args, **kwargs):
+    def __init__(self, sample_size=30, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.sample_size = sample_size
     

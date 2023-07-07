@@ -1,6 +1,6 @@
 class OnlineAvg:
     def __init__(self):
-        self.val, self.n = 1.19209e-04, 0 #epsilon
+        self.val, self.n = 0, 0 #epsilon
         
     def __add__(self, other):
         self.n += 1
