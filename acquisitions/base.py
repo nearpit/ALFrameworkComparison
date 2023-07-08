@@ -26,4 +26,3 @@ class Acquisition:
 
     def embedding_hook(self): # define the hooked layers if needed
         pass
-
