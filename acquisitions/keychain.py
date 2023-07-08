@@ -26,8 +26,7 @@ class Keychain(Acquisition):
         self.meta_acq.train_model()
         x, y = self.pool.get("unlabeled")
         inputs = self.preprocess(self.collect_inputs(x), self.feature_encoder())
-        with torch.no_grad():
-            scores = self.meta_acq(inputs)
+        scores = self.meta_acq(inputs)
         return scores[:, 0] 
     
     def preprocess(self, x, encoder):
@@ -35,9 +34,8 @@ class Keychain(Acquisition):
         return torch.from_numpy(x_transformed)
            
     def collect_inputs(self, x):
-        x = torch.Tensor(x)
-        with torch.no_grad():
-            probs = self.clf.model(x)
+        x = torch.Tensor(x).to(self.clf.device)
+        probs = self.clf.model(x)
         values = np.concatenate((x, probs), axis=-1)
         return values
 
