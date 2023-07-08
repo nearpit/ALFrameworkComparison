@@ -29,7 +29,3 @@ class Coreset(Acquisition):
         penultimate_layer_name = f"dense_{total_layer_depth - 2}" 
         penultimate_layer = getattr(self.clf.model.layers, penultimate_layer_name)
         penultimate_layer.register_forward_hook(self.get_activation(penultimate_layer_name))
-        
-
-    
-    
