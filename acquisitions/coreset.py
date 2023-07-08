@@ -13,15 +13,14 @@ class Coreset(Acquisition):
     def get_scores(self):
         latent_ulb, latent_lb = self.get_embeddings(self.pool.get("unlabeled")), self.get_embeddings(self.pool.get("labeled"))
 
-        pair_distance = pairwise_distances(latent_ulb, latent_lb)
+        pair_distance = pairwise_distances(latent_ulb.cpu(), latent_lb.cpu())
         min_dist = np.amin(pair_distance, axis=1)
 
         return min_dist
 
     def get_embeddings(self, inputs):
         x, y = inputs
-        with torch.no_grad():
-            self.clf(torch.Tensor(x))
+        self.clf(torch.Tensor(x))
         return self.latent
     
     def embedding_hook(self):
