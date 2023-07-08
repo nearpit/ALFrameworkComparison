@@ -34,8 +34,8 @@ class Keychain(Acquisition):
         return torch.from_numpy(x_transformed)
            
     def collect_inputs(self, x):
-        x = torch.Tensor(x).to(self.clf.device)
-        probs = self.clf.model(x)
+        x = torch.Tensor(x)
+        probs = self.clf.model(x).cpu()
         values = np.concatenate((x, probs), axis=-1)
         return values
 
