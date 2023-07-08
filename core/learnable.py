@@ -7,7 +7,7 @@ from utilities import NN, EarlyStopper, Tuner
 class Learnable:
 
     #DEBUG
-    epochs=1000
+    epochs=500
 
     model = None
     model_class = NN
@@ -42,8 +42,8 @@ class Learnable:
         self.tune_model()
 
     def __call__(self, x):
-        with torch.no_grad():
-                return self.model(torch.Tensor(x).to(self.device))
+      with torch.no_grad():
+        return self.model(x.to(self.device))
 
     @staticmethod
     def hook_once(func):
@@ -71,7 +71,6 @@ class Learnable:
         self.model_configs.update(new_configs)
         self.model = self.initialize_model()
         self.model.to(self.device)
-
     
     def eval_model(self, split_name):
         total_loss = 0
@@ -137,5 +136,3 @@ class Learnable:
     def tune_model(self):
         self.update_model_configs(Tuner(pool=self.pool, model=self, **self.tuner_configs)())
         self.train_model()
-
-    
