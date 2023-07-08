@@ -41,7 +41,11 @@ class Keychain(Acquisition):
     def keychain_iteration(self):
         best_loss, best_metrics = self.clf.eval_model("val")
 
-        model_path = os.getcwd() + "/temp/keychain_model"
+        model_path = os.getcwd() + "/temp/"
+        if not os.path.exists(model_path):
+            os.mkdir(model_path)
+        model_path += "keychain_model"
+        
         torch.save(self.clf.model.state_dict(), model_path)
 
         raw_targets = np.vectorize(lambda x: OnlineAvg())(np.zeros((self.pool.get_len("labeled"), 1)))
