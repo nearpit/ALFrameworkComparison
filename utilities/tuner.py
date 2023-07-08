@@ -16,7 +16,7 @@ class Tuner(BaseClass):
     pruner_configs = {"n_startup_trials": 10, "n_warmup_steps": 100}
     study_configs = {"pruner": optuna.pruners.MedianPruner(**pruner_configs)}
 
-    #CAVEAT check the objective direction    #DEBUG
+    #CAVEAT check the objective direction    
     def __init__(self, random_seed, direction="minimize", n_trials = 5, *args, **kwargs):    
         super().__init__(*args, **kwargs)
         # optuna.logging.set_verbosity(optuna.logging.WARNING) #DEBUG
