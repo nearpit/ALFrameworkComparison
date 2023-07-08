@@ -69,6 +69,8 @@ class Learnable:
     def update_model_configs(self, new_configs):
         self.model_configs.update(new_configs)
         self.model = self.initialize_model()
+        self.model.to(self.device)
+
     
     def eval_model(self, split_name):
         total_loss = 0
