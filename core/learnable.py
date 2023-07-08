@@ -42,7 +42,8 @@ class Learnable:
         self.tune_model()
 
     def __call__(self, x):
-        return self.model(x)
+        with torch.no_grad():
+                return self.model(torch.Tensor(x).to(self.device))
 
     @staticmethod
     def hook_once(func):
@@ -136,3 +137,5 @@ class Learnable:
     def tune_model(self):
         self.update_model_configs(Tuner(pool=self.pool, model=self, **self.tuner_configs)())
         self.train_model()
+
+    
