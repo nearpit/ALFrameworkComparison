@@ -21,19 +21,19 @@ class Learnable:
                             "last_activation_configs": {},
                             "criterion": "MSELoss"}}
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tuner_configs = {"n_trials": 100} #DEBUG
-
-
+    tuner_configs = {} 
 
     def __init__(self, 
                  pool,
                  random_seed,
+                 n_trials=100, #DEBUG
                  model_arch_name="MLP_clf"):
         
         self.random_seed = random_seed
         # Reproducibility
         torch.manual_seed(random_seed)
         self.tuner_configs["random_seed"] = random_seed
+        self.tuner_configs["n_trials"] = n_trials
         self.pool = pool
         self.model_configs = self.model_configs[model_arch_name].copy()
         self.model_configs.update({"metrics_dict":pool.metrics_dict,
