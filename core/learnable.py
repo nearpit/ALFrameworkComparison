@@ -31,7 +31,6 @@ class Learnable:
         self.random_seed = random_seed
         # Reproducibility
         torch.manual_seed(random_seed)
-        self.tuner_configs["random_seed"] = random_seed
         self.pool = pool
         self.model_configs = self.model_configs[model_arch_name].copy()
         self.model_configs.update({"metrics_dict":pool.metrics_dict,
