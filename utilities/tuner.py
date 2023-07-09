@@ -13,7 +13,7 @@ class BaseClass:
 
 class Tuner(BaseClass):
 
-    pruner_configs = {"n_startup_trials": 10, "n_warmup_steps": 100}
+    pruner_configs = {"n_startup_trials": 10, "n_warmup_steps": 200}
     study_configs = {"pruner": optuna.pruners.MedianPruner(**pruner_configs)}
 
     #CAVEAT check the objective direction    
