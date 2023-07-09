@@ -29,7 +29,7 @@ class ActiveLearning:
         results = []
         for idx in range(self.budget + 1):
             self.val_perf, self.test_perf = self.clf.eval_model("val"), self.clf.eval_model("test")
-            logging.warning(f'{self.val_perf} {self.test_perf} {self.last_cand} {self.pool.get_len("labeled")} {self.pool.get_len("unlabeled")}')
+            logging.warning(f'{self.val_perf} {self.test_perf} {self.last_cand} {self.pool.get_len("labeled")} {self.pool.get_len("unlabeled")} {self.args.dataset} {self.args.algorithm} {self.args.random_seed}')
 
 
             if self.retuner.early_stop(self.val_perf[0]): # if training is hindered

@@ -21,7 +21,7 @@ class Learnable:
                             "last_activation_configs": {},
                             "criterion": "MSELoss"}}
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tuner_configs = {"n_trials":5} #DEBUG
+    tuner_configs = {"n_trials":100} #DEBUG
 
     def __init__(self, 
                  pool,
