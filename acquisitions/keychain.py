@@ -44,7 +44,7 @@ class Keychain(Acquisition):
         model_path = os.getcwd() + "/temp/"
         if not os.path.exists(model_path):
             os.mkdir(model_path)
-        model_path += "keychain_model"
+        model_path += f"keychain_model_{self.random_seed}_{self.pool.data["train"].__class__.__name__}"
         
         torch.save(self.clf.model.state_dict(), model_path)
 
@@ -64,6 +64,7 @@ class Keychain(Acquisition):
         
 
         self.clf.model.load_state_dict(torch.load(model_path))
+        os.remove(model_path)
         
         x, y = self.pool.get("labeled")
         inputs = self.preprocess(self.collect_inputs(x), self.feature_encoder(lambda x: x))
