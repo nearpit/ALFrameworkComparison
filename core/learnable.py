@@ -7,7 +7,7 @@ from utilities import NN, EarlyStopper, Tuner
 class Learnable:
 
     #DEBUG
-    epochs=1000
+    epochs=100
 
     model = None
     model_class = NN
@@ -21,7 +21,7 @@ class Learnable:
                             "last_activation_configs": {},
                             "criterion": "MSELoss"}}
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tuner_configs = {"n_trials":200} #DEBUG
+    tuner_configs = {"n_trials":5} #DEBUG
 
     def __init__(self, 
                  pool,

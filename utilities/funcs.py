@@ -32,9 +32,8 @@ def get_arguments():
 
 
 
-def store_results(array, filename):
+def store_results(array, filename, path="results/"):
  
-    path = "results/"
     if not os.path.exists(path):
         os.makedirs(path)
 

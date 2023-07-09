@@ -36,7 +36,7 @@ class ActiveLearning:
                 logging.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!NEW UPSTREAM HYPERS WERE REQUESTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 self.clf.tune_model()
                 retuned.append(idx)
-                utilities.store_results(retuned, self.get_name(self.args) + "_retuned")
+                utilities.store_results(retuned, self.get_name(self.args) + "_retuned", path="results/extra")
 
              # LOGGINGS
             results.append(self.gather_results(idx))
