@@ -7,7 +7,7 @@ from utilities import NN, EarlyStopper, Tuner
 class Learnable:
 
     #DEBUG
-    epochs=100
+    epochs=1000
 
     model = None
     model_class = NN
