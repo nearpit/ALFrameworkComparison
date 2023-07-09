@@ -44,7 +44,7 @@ class Keychain(Acquisition):
         model_path = os.getcwd() + "/temp/"
         if not os.path.exists(model_path):
             os.mkdir(model_path)
-        model_path += f"keychain_model_{self.random_seed}_{self.pool.data["train"].__class__.__name__}"
+        model_path += f"keychain_model_{self.random_seed}_{self.pool.data['train'].__class__.__name__}"
         
         torch.save(self.clf.model.state_dict(), model_path)
 
