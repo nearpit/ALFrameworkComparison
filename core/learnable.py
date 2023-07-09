@@ -65,8 +65,11 @@ class Learnable:
     def initialize_model(self):
         return self.model_class(self.device, **self.model_configs)
     
-    def update_model_configs(self, new_configs):
+    def update_model_configs(self, new_configs, seed=None):
         self.model_configs.update(new_configs)
+        if seed is None:
+            seed = self.random_seed
+        torch.manual_seed(seed)
         self.model = self.initialize_model()
         self.model.to(self.device)
     
