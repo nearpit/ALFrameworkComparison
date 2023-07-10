@@ -36,5 +36,5 @@ pip install .
 - [ ] Keychain transform targets
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
-- [ ] Keychain __SUPERIOR__ (Heuristics + above mentioned non-heuristics)
+- [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)
 - [ ] Uncertainty Quantification via Autoencoder(AE)
