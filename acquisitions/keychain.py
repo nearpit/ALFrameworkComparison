@@ -13,7 +13,7 @@ class Keychain(Acquisition):
 
     meta_arch = NN
 
-    def __init__(self, buffer_capacity=5, n_samples=40, batch_share=0.3, *args, **kwargs):
+    def __init__(self, buffer_capacity=5, n_samples=40, batch_share=0.05, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.n_samples = n_samples
         self.batch_share = batch_share
@@ -49,18 +49,18 @@ class Keychain(Acquisition):
         torch.save(self.clf.model.state_dict(), model_path)
 
         raw_targets = np.vectorize(lambda x: OnlineAvg())(np.zeros((self.pool.get_len("labeled"), 1)))
-        labeled_pool = self.pool.idx_lb.copy()
+        intact_labeled_pool = self.pool.idx_lb.copy()
         relative_idx = np.arange(self.pool.get_len("labeled"))
         for _ in range(self.n_samples):
-            temp_removed = np.random.choice(relative_idx, int(len(labeled_pool)*self.batch_share), replace=False)
-            self.pool.idx_lb = np.delete(labeled_pool, temp_removed)
+            temp_removed = np.random.choice(relative_idx, int(np.ceil(len(intact_labeled_pool)*self.batch_share)), replace=False)
+            self.pool.idx_lb = np.delete(intact_labeled_pool, temp_removed)
             self.clf.reset_model()
             self.clf.train_model()
 
             loss, metrics = self.clf.eval_model("val")
-            raw_targets[temp_removed] += max(0, loss - best_loss)
+            raw_targets[temp_removed] += max(0., loss - best_loss)
 
-            self.pool.idx_lb = labeled_pool.copy()
+            self.pool.idx_lb = intact_labeled_pool.copy()
         
 
         self.clf.model.load_state_dict(torch.load(model_path))
