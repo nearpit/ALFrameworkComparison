@@ -33,6 +33,7 @@ pip install .
 
 ### \#TODO
 
+- [ ] Make moons instead of blobs
 - [ ] Keychain transform targets
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
