@@ -6,7 +6,7 @@
     "train_size":300,
     "n_classes": 2,
     "batch_size": 8,
-    "budget":100,
+    "budget":90,
     "metrics_dict": {
         "MulticlassAccuracy": {
             "num_classes": 2
