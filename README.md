@@ -3,7 +3,7 @@
 ## Installation
 
 ```
-conda create -n alrm python=3.9
+conda create -n alrm python=3.9 -y
 conda activate alrm  
 git clone https://github.com/Nearpit/ALRM.git
 cd ALRM
