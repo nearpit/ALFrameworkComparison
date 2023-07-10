@@ -35,8 +35,6 @@ pip install .
 
 - [ ] Keychain transform targets
 - [ ] Keychain naive
-- [ ] Keychain non-heuristics (AE and classifier latent repr, AE output, etc.)
-- [ ] ? Keychain heuristics (ensemble)
+- [ ] Keychain non-heuristics (naive + AE output, etc.)
 - [ ] Keychain __SUPERIOR__ (Heuristics + above mentioned non-heuristics)
 - [ ] Uncertainty Quantification via Autoencoder(AE)
-- [ ] Aggregated latent representations (AE and classifier) of both pools
