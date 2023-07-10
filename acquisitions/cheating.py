@@ -17,7 +17,7 @@ class Cheating(Acquisition):
         model_path = os.getcwd() + "/temp/"
         if not os.path.exists(model_path):
             os.mkdir(model_path)
-        model_path +=  "/oracle_model"
+        model_path +=  f"cheating_model_{self.random_seed}_{self.pool.data['train'].__class__.__name__}"
         torch.save(self.clf.model.state_dict(), model_path)
 
         for candidate in batch:
@@ -30,5 +30,6 @@ class Cheating(Acquisition):
             self.pool.idx_lb = self.pool.idx_lb[:-1] # removing just added candidate
         
         self.clf.model.load_state_dict(torch.load(model_path)) # restoring the initial params
+        os.remove(model_math)
 
         return scores[self.pool.idx_ulb]

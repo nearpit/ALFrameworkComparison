@@ -3,7 +3,7 @@
 ## Installation
 
 ```
-conda create -n alrm python=3.9
+conda create -n alrm python=3.9 -y
 conda activate alrm  
 git clone https://github.com/Nearpit/ALRM.git
 cd ALRM
@@ -33,10 +33,10 @@ pip install .
 
 ### \#TODO
 
+- [ ] Drop last = True and False if len(idx_lb) < batch_size
+- [ ] Make moons instead of blobs in toy dataset
 - [ ] Keychain transform targets
 - [ ] Keychain naive
-- [ ] Keychain non-heuristics (AE and classifier latent repr, AE output, etc.)
-- [ ] ? Keychain heuristics (ensemble)
-- [ ] Keychain __SUPERIOR__ (Heuristics + above mentioned non-heuristics)
+- [ ] Keychain non-heuristics (naive + AE output, etc.)
+- [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)
 - [ ] Uncertainty Quantification via Autoencoder(AE)
-- [ ] Aggregated latent representations (AE and classifier) of both pools
