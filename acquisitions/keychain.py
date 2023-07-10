@@ -13,13 +13,12 @@ class Keychain(Acquisition):
 
     meta_arch = NN
 
-    def __init__(self, buffer_capacity=5, n_samples=40, batch_share=0.05, *args, **kwargs):
+    def __init__(self, buffer_capacity=5, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.n_samples = n_samples
-        self.batch_share = batch_share
         self.buffer = ReplayBuffer(buffer_capacity)
         self.feature_encoder = FunctionTransformer
         self.target_encoder = FunctionTransformer
+
 
     def get_scores(self):
         self.keychain_iteration()
@@ -30,7 +29,7 @@ class Keychain(Acquisition):
         return scores[:, 0] 
     
     def preprocess(self, x, encoder):
-        x_transformed = encoder.fit_transform(x)
+        x_transformed = encoder.fit_transform(x.copy())
         return torch.from_numpy(x_transformed)
            
     def collect_inputs(self, x):
@@ -43,22 +42,20 @@ class Keychain(Acquisition):
 
         model_path = os.getcwd() + "/temp/"
         makedir(model_path)
+        self.raw_targets = np.vectorize(lambda x: OnlineAvg())(np.zeros((self.pool.get_len("labeled"), 1)))
 
         model_path += f"keychain_model_{self.random_seed}_{self.pool.data['train'].__class__.__name__}"
         
         torch.save(self.clf.model.state_dict(), model_path)
 
-        raw_targets = np.vectorize(lambda x: OnlineAvg())(np.zeros((self.pool.get_len("labeled"), 1)))
         intact_labeled_pool = self.pool.idx_lb.copy()
-        relative_idx = np.arange(self.pool.get_len("labeled"))
-        for _ in range(self.n_samples):
-            temp_removed = np.random.choice(relative_idx, int(np.ceil(len(intact_labeled_pool)*self.batch_share)), replace=False)
-            self.pool.idx_lb = np.delete(intact_labeled_pool, temp_removed)
+        for idx in range(len(intact_labeled_pool)):
+            self.pool.idx_lb = np.delete(intact_labeled_pool, idx)
             self.clf.reset_model()
             self.clf.train_model()
 
             loss, metrics = self.clf.eval_model("val")
-            raw_targets[temp_removed] += max(0., loss - best_loss)
+            self.raw_targets[idx] += max(0., loss - best_loss)
 
             self.pool.idx_lb = intact_labeled_pool.copy()
         
@@ -68,11 +65,13 @@ class Keychain(Acquisition):
         
         x, y = self.pool.get("labeled")
         inputs = self.preprocess(self.collect_inputs(x), self.feature_encoder(lambda x: x))
-        targets = self.preprocess(raw_targets.astype(np.float32), self.target_encoder(lambda x: x))
+        targets = self.preprocess(self.raw_targets.astype(np.float32), self.target_encoder(lambda x: x))
 
         self.buffer.push((inputs, targets))
 
         self.soak_from_buffer()
+
+        # self.raw_targets = np.append(self.raw_targets, OnlineAvg()).reshape(-1, 1)
 
 
     def soak_from_buffer(self):
