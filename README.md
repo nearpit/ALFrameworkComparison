@@ -33,7 +33,8 @@ pip install .
 
 ### \#TODO
 
-- [ ] Make moons instead of blobs
+- [ ] Drop last = True and False if len(idx_lb) < batch_size
+- [ ] Make moons instead of blobs in toy dataset
 - [ ] Keychain transform targets
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
