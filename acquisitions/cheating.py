@@ -3,6 +3,7 @@ import os
 import torch
 import numpy as np
 
+import utilities
 from acquisitions import Acquisition
 
 class Cheating(Acquisition):
@@ -15,8 +16,9 @@ class Cheating(Acquisition):
         batch = np.random.choice(self.pool.idx_ulb, self.sample_size, replace=False)
         scores = np.full(self.pool.get_len(), float("-inf"))
         model_path = os.getcwd() + "/temp/"
-        if not os.path.exists(model_path):
-            os.mkdir(model_path)
+        
+        utilities.makedir(model_path)
+
         model_path +=  f"cheating_model_{self.random_seed}_{self.pool.data['train'].__class__.__name__}"
         torch.save(self.clf.model.state_dict(), model_path)
 

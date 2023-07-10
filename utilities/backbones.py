@@ -41,14 +41,14 @@ class NN(nn.Module):
 
 class EarlyStopper:
                     #DEBUG
-    def __init__(self, patience=20, min_delta=0, starts_with=0):
+    def __init__(self, patience=100, min_delta=0, starts_with=0):
         self.patience = patience
         self.min_delta = min_delta
         self.counter = starts_with
         self.min_validation_loss = float("Inf")
 
     def early_stop(self, validation_loss):
-        if validation_loss < self.min_validation_loss:
+        if validation_loss <= self.min_validation_loss:
             self.min_validation_loss = validation_loss
             self.counter = 0
         elif validation_loss > (self.min_validation_loss + self.min_delta):

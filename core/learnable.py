@@ -21,11 +21,12 @@ class Learnable:
                             "last_activation_configs": {},
                             "criterion": "MSELoss"}}
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tuner_configs = {"n_trials":100} #DEBUG
+    tuner_configs = {"n_trials":10} #DEBUG
 
     def __init__(self, 
                  pool,
                  random_seed,
+                 model_configs=None,
                  model_arch_name="MLP_clf"):
         
         self.random_seed = random_seed
@@ -33,10 +34,15 @@ class Learnable:
         torch.manual_seed(random_seed)
         self.pool = pool
         self.model_configs = self.model_configs[model_arch_name].copy()
-        self.model_configs.update({"metrics_dict":pool.metrics_dict,
-                                   "batch_size":pool.batch_size})
+
+        if model_configs is None:
+            self.model_configs.update({"metrics_dict":pool.metrics_dict,
+                                    "batch_size":pool.batch_size})
+        else:
+            self.model_configs.update(model_configs)
+            self.train_model()
+
         self.model_arch_name = model_arch_name
-        self.tune_model()
 
     def __call__(self, x):
       with torch.no_grad():
@@ -96,7 +102,6 @@ class Learnable:
         self.model.eval()
         
         early_stopper = EarlyStopper()
-
         for epoch_num in range(self.epochs):
             train_loss = 0
 
@@ -113,8 +118,9 @@ class Learnable:
                 self.model.zero_grad()
                 batch_loss.backward()
                 self.model.optimizer.step()
-                                 
+
             train_metrics = self.model.metrics_set.flush()
+
             val_loss, val_metrics = self.eval_model("val")
 
             if trial:

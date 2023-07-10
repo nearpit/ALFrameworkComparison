@@ -75,9 +75,15 @@ class VectoralDataset(Dataset):
             data[shard_name]["y"] = self.target_encoder.transform(y)
            
         return data
-
+    
     @classmethod
-    def conv_split(self, array_size, shares=[0.6, 0.2]):
+    def get_data_dict(cls):
+        return {"train": cls(split_name="train"), 
+                "val": cls(split_name="val"),
+                "test": cls(split_name="test")}
+    
+    @staticmethod
+    def conv_split(array_size, shares=[0.6, 0.2]):
         indices = np.arange(array_size)
         idx_to_split = (np.cumsum(shares)*array_size).astype(int)
         permutated_idx = np.random.choice(indices, array_size, replace=False)

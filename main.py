@@ -1,8 +1,7 @@
-from utilities import funcs
-from core import ActiveLearning
+import utilities, core 
 
 
 if __name__ == '__main__':
-    args = funcs.get_arguments()
-    procedure = ActiveLearning(args)
+    args = utilities.get_arguments()
+    procedure = core.ActiveLearning(args)
     procedure.run()

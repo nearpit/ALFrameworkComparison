@@ -4,9 +4,12 @@ from torch.utils.data import DataLoader, Subset
 
 class Pool:
 
-    def __init__(self, data, random_seed, **kwargs):
+    def __init__(self, data, random_seed, whole_dataset=False, **kwargs):
         np.random.seed(random_seed)
         self.__dict__.update(**data["train"].configs)
+
+        if whole_dataset:
+            self.n_labeled = self.train_size
 
         self.idx_lb = np.random.choice(self.train_size, size=self.n_labeled, replace=False)
         self.data = data
@@ -32,10 +35,11 @@ class Pool:
       
     @property
     def train_loader(self):
+        drop_last = self.get_len("labeled") > self.batch_size # drop last if the number of labeled instances is bigger than the batch_size
         return DataLoader(Subset(self.data['train'], self.idx_lb), 
                           batch_size=self.batch_size, 
                           shuffle=True, 
-                          drop_last=False)
+                          drop_last=drop_last)
     
     def add_new_inst(self, idx):
         self.idx_lb = np.append(self.idx_lb, idx)

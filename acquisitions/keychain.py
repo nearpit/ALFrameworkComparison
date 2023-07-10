@@ -4,7 +4,7 @@ import torch
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler, FunctionTransformer
 
-from utilities import NN, ReplayBuffer, OnlineAvg
+from utilities import NN, ReplayBuffer, OnlineAvg, makedir
 from datasets import VectoralDataset, ReplayDataset
 from acquisitions import Acquisition
 from core import Learnable, Pool
@@ -23,7 +23,7 @@ class Keychain(Acquisition):
 
     def get_scores(self):
         self.keychain_iteration()
-        self.meta_acq.train_model()
+        self.meta_acq.tune_model()
         x, y = self.pool.get("unlabeled")
         inputs = self.preprocess(self.collect_inputs(x), self.feature_encoder())
         scores = self.meta_acq(inputs)
@@ -42,8 +42,8 @@ class Keychain(Acquisition):
         best_loss, best_metrics = self.clf.eval_model("val")
 
         model_path = os.getcwd() + "/temp/"
-        if not os.path.exists(model_path):
-            os.mkdir(model_path)
+        makedir(model_path)
+
         model_path += f"keychain_model_{self.random_seed}_{self.pool.data['train'].__class__.__name__}"
         
         torch.save(self.clf.model.state_dict(), model_path)
@@ -77,7 +77,7 @@ class Keychain(Acquisition):
 
     def soak_from_buffer(self):
         x, y = self.buffer.get_data()
-        train_idx, val_idx = VectoralDataset.conv_split(y.shape[0], shares=[0.8])
+        train_idx, val_idx = VectoralDataset.conv_split(y.shape[0], shares=[0.6])
         data = {
             "train": ReplayDataset(x[train_idx], y[train_idx]),
             "val": ReplayDataset(x[val_idx], y[val_idx])

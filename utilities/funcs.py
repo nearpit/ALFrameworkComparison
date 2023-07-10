@@ -1,4 +1,3 @@
-import pickle
 import os
 from argparse import ArgumentParser
 
@@ -10,7 +9,6 @@ def get_arguments():
                         choices=["dna", "splice", "toy"])
     parser.add_argument("-a", "--algorithm",
                         help="What active learning algorithm to evaluate",  
-                        required=True,
                         choices=["random",
                                  "cheating",
                                  "keychain",
@@ -30,12 +28,6 @@ def get_arguments():
     
     return parser.parse_args()
 
-
-
-def store_results(array, filename, path="results/"):
- 
+def makedir(path):
     if not os.path.exists(path):
         os.makedirs(path)
-
-    with open(f'{path}{filename}.pkl', 'wb') as file:
-        pickle.dump(array, file)
