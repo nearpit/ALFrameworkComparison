@@ -2,7 +2,6 @@ import os
 
 import torch
 import numpy as np
-from sklearn.preprocessing import FunctionTransformer
 
 from utilities import NN, ReplayBuffer, makedir
 from datasets import VectoralDataset, ReplayDataset
@@ -13,11 +12,10 @@ class Keychain(Acquisition):
 
     meta_arch = NN
 
-    def __init__(self, buffer_capacity=10, *args, **kwargs):
+    def __init__(self, buffer_capacity=1, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.buffer = ReplayBuffer(buffer_capacity)
-        self.feature_encoder = FunctionTransformer
-        self.target_encoder = FunctionTransformer
+
         self.meta_val_perf = []
 
 
@@ -55,7 +53,8 @@ class Keychain(Acquisition):
             self.clf.train_model()
 
             loss, metrics = self.clf.eval_model("val")
-            self.raw_targets[idx] += max(0., loss - best_loss)
+            self.raw_targets[idx] += loss - best_loss
+            # self.raw_targets[idx] += max(0., loss - best_loss)
 
             self.pool.idx_lb = intact_labeled_pool.copy()
         
@@ -73,7 +72,12 @@ class Keychain(Acquisition):
 
     def soak_from_buffer(self):
         x, y = self.buffer.get_data()
-        train_idx, val_idx = VectoralDataset.conv_split(y.shape[0], shares=[0.6])
+        val_chunk = len(self.raw_targets)
+        if len(self.buffer._y) == 1:
+            train_idx, val_idx = VectoralDataset.conv_split(y.shape[0], shares=[0.6])
+        else:
+            train_idx, val_idx = VectoralDataset.step_split(y.shape[0], val_chunk)
+
         data = {
             "train": ReplayDataset(x[train_idx], y[train_idx]),
             "val": ReplayDataset(x[val_idx], y[val_idx])

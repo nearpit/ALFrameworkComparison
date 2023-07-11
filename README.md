@@ -33,7 +33,8 @@ pip install .
 
 ### \#TODO
 
-- [ ] VISUALIZATION
+- [ ] Visualization acq score contourf
+- [ ] Toy Circles
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
 - [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)

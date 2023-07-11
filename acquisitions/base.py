@@ -19,7 +19,7 @@ class Acquisition:
         all_scores = self.get_scores()
         max_scores = np.argwhere(all_scores == all_scores.max()).ravel()
         idx = np.random.choice(max_scores, 1)[0]
-        return self.pool.idx_ulb[idx]
+        return self.pool.idx_ulb[idx], idx, all_scores 
     
     # auxiliary function for latent representations
     def get_activation(self, name):
@@ -30,3 +30,4 @@ class Acquisition:
 
     def embedding_hook(self): # define the hooked layers if needed
         pass
+    

@@ -88,6 +88,13 @@ class VectoralDataset(Dataset):
         idx_to_split = (np.cumsum(shares)*array_size).astype(int)
         permutated_idx = np.random.choice(indices, array_size, replace=False)
         return np.split(permutated_idx, idx_to_split)
+
+    @staticmethod
+    def step_split(array_size, val_chunk):
+        indices = np.arange(array_size)
+        train_idx = np.random.choice(indices[:-val_chunk], indices[:-val_chunk].shape[0], replace=False)
+        val_idx = indices[-val_chunk:]
+        return train_idx, val_idx
      
     def obtain(self):
         pass

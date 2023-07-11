@@ -32,6 +32,7 @@ class Pool:
     @property
     def idx_ulb(self):
         return np.delete(self.idx_intact, self.idx_lb)
+    
       
     @property
     def train_loader(self):
@@ -49,4 +50,7 @@ class Pool:
         if pool == "labeled":
             return self.data["train"][self.idx_lb]
         elif pool == "unlabeled":
-            return self.data["train"][self.idx_ulb]     
+            return self.data["train"][self.idx_ulb]   
+          
+    def get_train_instance(self, idx):
+        return self.data["train"][idx]

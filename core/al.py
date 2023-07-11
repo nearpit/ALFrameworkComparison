@@ -16,17 +16,21 @@ class ActiveLearning:
         self.clf = core.Learnable(pool=self.pool, random_seed=self.random_seed, model_configs=best_hypers)
         self.acq = Acqclass(clf=self.clf, pool=self.pool, random_seed=self.random_seed)
         self.retuner = utilities.EarlyStopper(patience=args.hindered_iters)
+        self.visualizer = utilities.Visualize(self.pool, self.clf)
        
     def run(self):
         results = []
-        last_cand = -1
+        last_cand = None
         val_perf, test_perf = self.clf.eval_model("val"), self.clf.eval_model("test")
         logging.warning(f'{val_perf} {test_perf} {last_cand} {self.pool.get_len("labeled")} {self.pool.get_len("unlabeled")} {utilities.get_name(args=self.args)}')
+        self.visualizer.plot_decision_boundary()
 
 
         for idx in range(self.budget):
 
-            last_cand = self.acq.query()
+            last_cand, relative_idx, all_scores = self.acq.query()
+            self.visualizer.plot_chosen(all_scores, relative_idx)
+
             self.pool.add_new_inst(last_cand)
 
             self.clf.reset_model()
