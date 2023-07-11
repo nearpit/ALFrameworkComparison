@@ -33,7 +33,6 @@ pip install .
 
 ### \#TODO
 
-- [ ] Keychain transform targets
 - [ ] VISUALIZATION
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)

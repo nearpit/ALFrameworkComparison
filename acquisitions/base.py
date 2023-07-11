@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 class Acquisition: 
     latent = None
@@ -15,7 +16,10 @@ class Acquisition:
         pass
 
     def query(self):
-        return self.pool.idx_ulb[self.get_scores().argmax()]
+        all_scores = self.get_scores()
+        max_scores = np.argwhere(all_scores == all_scores.max()).ravel()
+        idx = np.random.choice(max_scores, 1)[0]
+        return self.pool.idx_ulb[idx]
     
     # auxiliary function for latent representations
     def get_activation(self, name):

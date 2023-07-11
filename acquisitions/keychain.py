@@ -2,9 +2,9 @@ import os
 
 import torch
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler, FunctionTransformer
+from sklearn.preprocessing import FunctionTransformer
 
-from utilities import NN, ReplayBuffer, OnlineAvg, makedir
+from utilities import NN, ReplayBuffer, makedir
 from datasets import VectoralDataset, ReplayDataset
 from acquisitions import Acquisition
 from core import Learnable, Pool
@@ -13,25 +13,25 @@ class Keychain(Acquisition):
 
     meta_arch = NN
 
-    def __init__(self, buffer_capacity=5, *args, **kwargs):
+    def __init__(self, buffer_capacity=10, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.buffer = ReplayBuffer(buffer_capacity)
         self.feature_encoder = FunctionTransformer
         self.target_encoder = FunctionTransformer
+        self.meta_val_perf = []
+
 
 
     def get_scores(self):
         self.keychain_iteration()
         self.meta_acq.tune_model()
+        self.meta_val_perf.append(self.meta_acq.eval_model("val")[0])
         x, y = self.pool.get("unlabeled")
-        inputs = self.preprocess(self.collect_inputs(x), self.feature_encoder())
-        scores = self.meta_acq(inputs)
+        inputs = self.collect_inputs(x)
+        scores = self.meta_acq(torch.Tensor(inputs))
         return scores[:, 0] 
     
-    def preprocess(self, x, encoder):
-        x_transformed = encoder.fit_transform(x.copy())
-        return torch.from_numpy(x_transformed)
-           
+          
     def collect_inputs(self, x):
         probs = self.clf(torch.Tensor(x))
         values = np.concatenate((x, probs.cpu()), axis=-1)
@@ -42,7 +42,7 @@ class Keychain(Acquisition):
 
         model_path = os.getcwd() + "/temp/"
         makedir(model_path)
-        self.raw_targets = np.vectorize(lambda x: OnlineAvg())(np.zeros((self.pool.get_len("labeled"), 1)))
+        self.raw_targets = np.zeros((self.pool.get_len("labeled"), 1))
 
         model_path += f"keychain_model_{self.random_seed}_{self.pool.data['train'].__class__.__name__}"
         
@@ -64,15 +64,12 @@ class Keychain(Acquisition):
         os.remove(model_path)
         
         x, y = self.pool.get("labeled")
-        inputs = self.preprocess(self.collect_inputs(x), self.feature_encoder(lambda x: x))
-        targets = self.preprocess(self.raw_targets.astype(np.float32), self.target_encoder(lambda x: x))
+        inputs = self.collect_inputs(x)
+        targets = self.raw_targets.astype(np.float32)
 
-        self.buffer.push((inputs, targets))
+        self.buffer.push(inputs, targets)
 
         self.soak_from_buffer()
-
-        # self.raw_targets = np.append(self.raw_targets, OnlineAvg()).reshape(-1, 1)
-
 
     def soak_from_buffer(self):
         x, y = self.buffer.get_data()
@@ -82,4 +79,4 @@ class Keychain(Acquisition):
             "val": ReplayDataset(x[val_idx], y[val_idx])
         }
         pool = Pool(data=data, random_seed=self.random_seed)
-        self.meta_acq = Learnable(pool=pool, random_seed=self.random_seed, model_arch_name="MLP_reg") 
+        self.meta_acq = Learnable(pool=pool, random_seed=self.random_seed) 
