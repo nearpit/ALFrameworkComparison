@@ -19,7 +19,7 @@ class Acquisition:
         all_scores = self.get_scores()
         max_scores = np.argwhere(all_scores == all_scores.max()).ravel()
         idx = np.random.choice(max_scores, 1)[0]
-        return self.pool.idx_ulb[idx], idx, all_scores 
+        return self.pool.idx_ulb[idx], idx 
     
     # auxiliary function for latent representations
     def get_activation(self, name):

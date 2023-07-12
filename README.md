@@ -33,6 +33,7 @@ pip install .
 
 ### \#TODO
 
+- [ ] bring back dna n_labeled = 600 in configs
 - [ ] Visualization acq score contourf
 - [ ] Toy Circles
 - [ ] Keychain naive

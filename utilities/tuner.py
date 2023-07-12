@@ -17,8 +17,8 @@ class Tuner(BaseClass):
     study_configs = {"pruner": optuna.pruners.MedianPruner(**pruner_configs)}
     seed = 42
 
-    #CAVEAT check the objective direction    
-    def __init__(self, direction="minimize", n_trials = 5, *args, **kwargs):    
+    #CAVEAT check the objective direction   #DEBUG  
+    def __init__(self, direction="minimize", n_trials = 10, *args, **kwargs):    
         super().__init__(*args, **kwargs)
         optuna.logging.set_verbosity(optuna.logging.WARNING) #DEBUG
         self.n_trials = n_trials  
@@ -28,7 +28,6 @@ class Tuner(BaseClass):
 
     def __call__(self):
         study = optuna.create_study(**self.study_configs)
-        #TODO chech the attributes of study and find "Objective" instance there
         study.optimize(Objective(model=self.model, pool=self.pool), n_trials=self.n_trials)
 
         return self.align_params(study.best_params)

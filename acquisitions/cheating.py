@@ -32,6 +32,6 @@ class Cheating(Acquisition):
             self.pool.idx_lb = self.pool.idx_lb[:-1] # removing just added candidate
         
         self.clf.model.load_state_dict(torch.load(model_path)) # restoring the initial params
-        os.remove(model_math)
+        os.remove(model_path)
 
         return scores[self.pool.idx_ulb]

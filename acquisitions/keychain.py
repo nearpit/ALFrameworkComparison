@@ -20,12 +20,14 @@ class Keychain(Acquisition):
 
 
 
-    def get_scores(self):
-        self.keychain_iteration()
-        self.meta_acq.tune_model()
-        self.meta_val_perf.append(self.meta_acq.eval_model("val")[0])
-        x, y = self.pool.get("unlabeled")
-        inputs = self.collect_inputs(x)
+    def get_scores(self, values=None):
+        if values is None:
+            self.keychain_iteration()
+            self.meta_acq.tune_model()
+            self.meta_val_perf.append(self.meta_acq.eval_model("val")[0])
+            values, y = self.pool.get("unlabeled")
+
+        inputs = self.collect_inputs(values)
         scores = self.meta_acq(torch.Tensor(inputs))
         return scores[:, 0] 
     
@@ -54,7 +56,6 @@ class Keychain(Acquisition):
 
             loss, metrics = self.clf.eval_model("val")
             self.raw_targets[idx] += loss - best_loss
-            # self.raw_targets[idx] += max(0., loss - best_loss)
 
             self.pool.idx_lb = intact_labeled_pool.copy()
         

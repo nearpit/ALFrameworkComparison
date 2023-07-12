@@ -21,7 +21,6 @@ class Learnable:
                             "last_activation_configs": {},
                             "criterion": "MSELoss"}}
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tuner_configs = {"n_trials":10} #DEBUG
 
     def __init__(self, 
                  pool,
@@ -98,8 +97,7 @@ class Learnable:
     @initilize_first
     def train_model(self, trial=None):
 
-        # TO DISABLE DROPOUT (and Normalization if it is added)
-        self.model.eval()
+        self.model.eval()        # To disable Dropout 
         
         early_stopper = EarlyStopper()
         for epoch_num in range(self.epochs):
@@ -140,5 +138,5 @@ class Learnable:
                 if hasattr(layer, 'reset_parameters'):
                     layer.reset_parameters()
     def tune_model(self):
-        self.update_model_configs(Tuner(pool=self.pool, model=self, **self.tuner_configs)())
+        self.update_model_configs(Tuner(pool=self.pool, model=self)())
         self.train_model()

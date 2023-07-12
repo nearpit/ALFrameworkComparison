@@ -6,12 +6,14 @@ class Bald(Acquisition):
         super().__init__(*args, **kwargs)
         self.forward_passes = forward_passes
     
-    def get_scores(self):
+    def get_scores(self, values=None):
+
         self.clf.model.train()        # To enable Dropout 
-        total_predictions = torch.empty((0, self.pool.get_len("unlabeled"), self.pool.n_classes)).to(self.clf.device)
-        x, y = self.pool.get("unlabeled")
+        if values is None:
+           values = self.pool.get("unlabeled")[0]
+        total_predictions = torch.empty((0, len(values), self.pool.n_classes)).to(self.clf.device)
         for _ in range(self.forward_passes):
-            probs = self.clf(torch.Tensor(x))
+            probs = self.clf(torch.Tensor(values))
             total_predictions = torch.cat((total_predictions, torch.unsqueeze(probs, 0)))
 
         self.clf.model.eval()        # To disable Dropout 
