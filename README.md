@@ -33,9 +33,9 @@ pip install .
 
 ### \#TODO
 
-- [ ] bring back dna n_labeled = 600 in configs
-- [ ] Visualization acq score contourf
-- [ ] Toy Circles
+- [ ] Online Regularization(and/or)Learning Rate Tuning
+- [ ] Sampling Keychain
+- [ ] Bring back dna n_labeled = 600 in configs
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
 - [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)

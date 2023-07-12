@@ -51,7 +51,7 @@ class Visualize:
     def acq_boundary(self, ax, chosen_idx):
         Z = (self.acq.get_scores(self.clf_inputs)).reshape(self.x1.shape)
         # Z_rescaled = MinMaxScaler().fit_transform(Z)
-        CS = ax.contourf(self.x1, self.x2, Z, cmap=plt.cm.binary, alpha=0.3, antialiased=True)
+        ax.contourf(self.x1, self.x2, Z, cmap=plt.cm.binary, alpha=0.3, antialiased=True)
         x, y = self.pool.get("unlabeled")
         chosen_x, chosen_y = x[chosen_idx], y[chosen_idx]
         x, y = np.delete(x, chosen_idx, axis=0), np.delete(y, chosen_idx, axis=0)
