@@ -31,6 +31,7 @@ def store_file(array, filename, path="results/"):
 def retrieve_pkl(path):
     if os.path.exists(path):
         with open(path, 'rb') as file:
-            return pickle.load(file)
+            x = pickle.load(file)
     else:
-        return None
+        x = None
+    return x
