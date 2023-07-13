@@ -1,4 +1,4 @@
-from datasets.base import SVMDataset, VectoralDataset
+from datasets.base import SVMDataset
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
 class Splice(SVMDataset):
