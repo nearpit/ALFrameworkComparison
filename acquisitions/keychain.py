@@ -12,7 +12,7 @@ class Keychain(Acquisition):
 
     meta_arch = NN
 
-    def __init__(self, buffer_capacity=1, *args, **kwargs):
+    def __init__(self, buffer_capacity=90, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.buffer = ReplayBuffer(buffer_capacity)
 
