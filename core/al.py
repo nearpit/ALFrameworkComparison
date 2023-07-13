@@ -13,7 +13,10 @@ class ActiveLearning:
         hyper_path = "results/aux/" + utilities.get_name(self.args, include_alg=False) + "_best_hypers.pkl"
         best_hypers = utilities.retrieve_pkl(hyper_path)
         self.pool = core.Pool(data=Dataclass.get_data_dict(), random_seed=self.random_seed)
-        self.clf = core.Learnable(pool=self.pool, random_seed=self.random_seed, model_configs=best_hypers)
+        self.clf = core.Learnable(pool=self.pool, 
+                                  random_seed=self.random_seed,
+                                  model_configs=best_hypers,
+                                  tunable_hypers=["weight_decay", "lr"])
         self.acq = Acqclass(clf=self.clf, pool=self.pool, random_seed=self.random_seed)
         self.retuner = utilities.EarlyStopper(patience=args.hindered_iters)
         if args.visualizer:
@@ -26,7 +29,6 @@ class ActiveLearning:
         logging.warning(f'{val_perf} {test_perf} {abs_idx} {self.pool.get_len("labeled")} {self.pool.get_len("unlabeled")} {utilities.get_name(args=self.args)}')
 
 
-        # start_time = time.time() #DELETE
         for idx in range(self.budget):
 
             abs_idx, relative_idx = self.acq.query()
@@ -35,12 +37,8 @@ class ActiveLearning:
 
             self.pool.add_new_inst(abs_idx)
 
-            self.clf.reset_model()
-            self.clf.train_model()
+            self.clf.tune_model()
             val_perf, test_perf = self.clf.eval_model("val"), self.clf.eval_model("test")
-
-            
-            # logging.warning(f'{"!"*60}{time.time() - start_time}{"!"*60}') #DELETE
 
             # LOGGINGS
             logging.warning(f'{val_perf} {test_perf} {abs_idx} {self.pool.get_len("labeled")} {self.pool.get_len("unlabeled")} {utilities.get_name(args=self.args)}')

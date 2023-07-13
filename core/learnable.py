@@ -7,7 +7,7 @@ from utilities import NN, EarlyStopper, Tuner
 class Learnable:
 
     #DEBUG
-    epochs=1000
+    epochs=100
 
     model = None
     model_class = NN
@@ -25,6 +25,7 @@ class Learnable:
     def __init__(self, 
                  pool,
                  random_seed,
+                 tunable_hypers=["lr", "weight_decay", "layers_size"],
                  model_configs=None,
                  model_arch_name="MLP_clf"):
         
@@ -32,16 +33,18 @@ class Learnable:
         # Reproducibility
         torch.manual_seed(random_seed)
         self.pool = pool
+        self.model_arch_name = model_arch_name
         self.model_configs = self.model_configs[model_arch_name].copy()
+
+        self.tunable_hypers = tunable_hypers
 
         if model_configs is None:
             self.model_configs.update({"metrics_dict":pool.metrics_dict,
-                                    "batch_size":pool.batch_size})
+                                       "batch_size":pool.batch_size})
         else:
-            self.model_configs.update(model_configs)
-            self.train_model()
+            self.update_model_configs(model_configs)
+            self.tune_model()
 
-        self.model_arch_name = model_arch_name
 
     def __call__(self, x):
       with torch.no_grad():
@@ -96,6 +99,7 @@ class Learnable:
 
     @initilize_first
     def train_model(self, trial=None):
+        self.reset_model()       # To bring the model to the same starting point
 
         self.model.eval()        # To disable Dropout 
         
@@ -137,6 +141,7 @@ class Learnable:
             for layer in seq.modules():
                 if hasattr(layer, 'reset_parameters'):
                     layer.reset_parameters()
+
     def tune_model(self):
-        self.update_model_configs(Tuner(pool=self.pool, model=self)())
+        self.update_model_configs(Tuner(pool=self.pool, model=self, tunable_hypers=self.tunable_hypers)())
         self.train_model()

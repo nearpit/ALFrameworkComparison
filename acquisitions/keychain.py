@@ -51,7 +51,6 @@ class Keychain(Acquisition):
         intact_labeled_pool = self.pool.idx_lb.copy()
         for idx in range(len(intact_labeled_pool)):
             self.pool.idx_lb = np.delete(intact_labeled_pool, idx)
-            self.clf.reset_model()
             self.clf.train_model()
 
             loss, metrics = self.clf.eval_model("val")

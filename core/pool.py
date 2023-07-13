@@ -50,7 +50,11 @@ class Pool:
         if pool == "labeled":
             return self.data["train"][self.idx_lb]
         elif pool == "unlabeled":
-            return self.data["train"][self.idx_ulb]   
+            return self.data["train"][self.idx_ulb] 
+        elif pool == "val":
+            return self.data["val"][:]
+        elif pool == "test":
+            return self.data["test"][:]
           
     def get_train_instance(self, idx):
         return self.data["train"][idx]

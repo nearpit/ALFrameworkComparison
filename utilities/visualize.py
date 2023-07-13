@@ -26,15 +26,30 @@ class Visualize:
         self.x1, self.x2 = np.meshgrid(x1_span, x2_span)
         self.clf_inputs = torch.from_numpy(np.column_stack([self.x1.ravel(), self.x2.ravel()])).float()
     
-    def clf_boundary(self, ax, test_perf, val_perf):
-        Z = (self.clf(self.clf_inputs)[:, 1]).reshape(self.x1.shape)
-        CS_boundary = ax.contourf(self.x1, self.x2, Z, alpha=0.3, cmap=plt.cm.coolwarm)
+
+    
+    def compute_clf_grad(self):
+        self.clf_grad = (self.clf(self.clf_inputs)[:, 1]).reshape(self.x1.shape)
+
+    def clf_train(self, ax):
+        ax.contourf(self.x1, self.x2, self.clf_grad, alpha=0.3, cmap=plt.cm.coolwarm)
         x, y = self.pool.get("unlabeled")
-        ax.scatter(x[:, 0], x[:, 1], marker='2', c='grey', alpha=0.4, s=self.max_dot_size, label="Unlabeled")
+        ax.scatter(x[:, 0], x[:, 1], marker='2', c='grey', alpha=0.4, s=self.max_dot_size)
 
         x, y = self.pool.get("labeled")
-        ax.scatter(x[:, 0], x[:, 1], marker='^', c=y.argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)
-        ax.set_title("Classifier")
+        ax.scatter(x[:, 0], x[:, 1], marker='^', c=y.argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)        
+        ax.set_title("Classifier Labeled/Unlabeled")
+    
+
+    def clf_val(self, ax, test_perf, val_perf):
+
+        ax.contourf(self.x1, self.x2, self.clf_grad, alpha=0.3, cmap=plt.cm.coolwarm)
+        x, y = self.pool.get("val")
+        ax.scatter(x[:, 0], x[:, 1], marker='x', alpha=0.5, c=y.argmax(axis=-1), s=self.max_dot_size/2, cmap=plt.cm.coolwarm)
+        x, y = self.pool.get("test")
+        ax.scatter(x[:, 0], x[:, 1], marker='$O$', alpha=0.5, c=y.argmax(axis=-1), s=self.max_dot_size/2, cmap=plt.cm.coolwarm)
+        
+        ax.set_title("Classifier Val/Test")
         performance_string = f"Test {test_perf[1]['MulticlassAccuracy']:.1%}\nVal {val_perf[1]['MulticlassAccuracy']:.1%}"
         ax.annotate(performance_string, xy=(0.03, 0.97), xycoords='axes fraction',
                     ha='left', va='top',
@@ -50,7 +65,6 @@ class Visualize:
         
     def acq_boundary(self, ax, chosen_idx):
         Z = (self.acq.get_scores(self.clf_inputs)).reshape(self.x1.shape)
-        # Z_rescaled = MinMaxScaler().fit_transform(Z)
         ax.contourf(self.x1, self.x2, Z, cmap=plt.cm.binary, alpha=0.3, antialiased=True)
         x, y = self.pool.get("unlabeled")
         chosen_x, chosen_y = x[chosen_idx], y[chosen_idx]
@@ -66,22 +80,26 @@ class Visualize:
 
 
 
-
-
     def make_plots(self, chosen_idx, args, iter, val_perf, test_perf):
-        fig, ax = plt.subplots(1, 2, figsize=(15, 5))
-        self.clf_boundary(ax[0], test_perf, val_perf)
-        self.acq_boundary(ax[1], chosen_idx)
+        fig, ax = plt.subplots(1, 3, figsize=(20, 5))
+        self.compute_clf_grad()
+        self.clf_val(ax[0], test_perf, val_perf)
+        self.clf_train(ax[1])
+        self.acq_boundary(ax[2], chosen_idx)
         plt.suptitle(f"{str(args.algorithm).capitalize()} Iter:{iter} Random Seed:{args.random_seed}", fontsize="x-large")
         labeled_point = Line2D([0], [0], label='Labeled', marker='^', color='black', linestyle='')
         unlabeled_point = Line2D([0], [0], label='Unlabeled', marker='2', markersize=10, color='black', linestyle='')
-        chosen_point = Line2D([0], [0], label='Next added', marker='o',  markeredgewidth=2, markersize=8, markerfacecolor='none', markeredgecolor='black', linestyle='')
+        val_points = Line2D([0], [0], label='Val', marker='x', color='black', linestyle='')
+        test_points = Line2D([0], [0], label='Test', marker='$O$', color='black', linestyle='')
+
+
+        chosen_point = Line2D([0], [0], label='Next added', marker='o',  markeredgewidth=2, markersize=8, markerfacecolor='grey', markeredgecolor='black', linestyle='')
         class_0 = mpatches.Patch(color=plt.cm.coolwarm(0), label='Class B')  
         class_1 = mpatches.Patch(color=plt.cm.coolwarm(255), label='Class A')  
 
 
 
-        legend_elements = [labeled_point, unlabeled_point, chosen_point, class_0, class_1]
+        legend_elements = [val_points, test_points, labeled_point, unlabeled_point, class_0, class_1, chosen_point]
         plt.figlegend(handles=legend_elements, loc='lower center', ncol=len(legend_elements), fancybox=True, shadow=True)
 
         path_to_store = f"results/aux/{args.dataset}/{args.algorithm}/plots/{args.random_seed}/"

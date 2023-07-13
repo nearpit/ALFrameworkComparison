@@ -24,7 +24,6 @@ class Cheating(Acquisition):
 
         for candidate in batch:
             torch.manual_seed(self.random_seed)
-            self.clf.reset_model()
             self.pool.add_new_inst(candidate)
             self.clf.train_model()
             loss, accuracy = self.clf.eval_model('val')
