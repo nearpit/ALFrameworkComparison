@@ -3,10 +3,10 @@ import os
 import torch
 import numpy as np
 
-from utilities import NN, ReplayBuffer, makedir
+from core import Learnable, Pool
+from utilities import ReplayBuffer, makedir, NN
 from datasets import VectoralDataset, ReplayDataset
 from acquisitions import Acquisition
-from core import Learnable, Pool
 
 class Keychain(Acquisition):
 
@@ -24,7 +24,7 @@ class Keychain(Acquisition):
         if values is None:
             self.keychain_iteration()
             self.meta_acq.tune_model()
-            self.meta_val_perf.append(self.meta_acq.eval_model("val")[0])
+            self.meta_val_perf.append(self.meta_acq.eval("val")[0])
             values, y = self.pool.get("unlabeled")
 
         inputs = self.collect_inputs(values)

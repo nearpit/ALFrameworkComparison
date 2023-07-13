@@ -1,6 +1,6 @@
 class OnlineAvg:
     def __init__(self):
-        self.val, self.n = 0, 0
+        self.val, self.n = 0., 0
         
     def __add__(self, other):
         self.n += 1
@@ -12,3 +12,9 @@ class OnlineAvg:
     
     def __float__(self):
         return self.val
+    
+    def __le__(self, other):
+        return self.val <= float(other)
+    
+    def __lt__(self, other):
+        return self.val < float(other)

@@ -79,7 +79,6 @@ class VectoralDataset(Dataset):
     @classmethod
     def get_data_dict(cls):
         return {"train": cls(split_name="train"), 
-                "val": cls(split_name="val"),
                 "test": cls(split_name="test")}
     
     @staticmethod

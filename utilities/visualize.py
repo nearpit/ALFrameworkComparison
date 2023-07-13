@@ -31,26 +31,29 @@ class Visualize:
     def compute_clf_grad(self):
         self.clf_grad = (self.clf(self.clf_inputs)[:, 1]).reshape(self.x1.shape)
 
-    def clf_train(self, ax):
-        ax.contourf(self.x1, self.x2, self.clf_grad, alpha=0.3, cmap=plt.cm.coolwarm)
+    def clf_train(self, ax, train_perf, val_perf):
+        ax.contourf(self.x1, self.x2, self.clf_grad, alpha=0.3, cmap=plt.cm.coolwarm, antialiased=True)
         x, y = self.pool.get("unlabeled")
         ax.scatter(x[:, 0], x[:, 1], marker='2', c='grey', alpha=0.4, s=self.max_dot_size)
 
         x, y = self.pool.get("labeled")
         ax.scatter(x[:, 0], x[:, 1], marker='^', c=y.argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)        
         ax.set_title("Classifier Labeled/Unlabeled")
+        performance_string = f"Train {train_perf[1]['MulticlassAccuracy']:.1%}\nVal {val_perf[1]['MulticlassAccuracy']:.1%}"
+        ax.annotate(performance_string, xy=(0.03, 0.97), xycoords='axes fraction',
+                    ha='left', va='top',
+                    bbox=dict(boxstyle='round', fc='w'))
     
 
-    def clf_val(self, ax, test_perf, val_perf):
+    def clf_test(self, ax, test_perf):
 
-        ax.contourf(self.x1, self.x2, self.clf_grad, alpha=0.3, cmap=plt.cm.coolwarm)
-        x, y = self.pool.get("val")
-        ax.scatter(x[:, 0], x[:, 1], marker='x', alpha=0.5, c=y.argmax(axis=-1), s=self.max_dot_size/2, cmap=plt.cm.coolwarm)
+        ax.contourf(self.x1, self.x2, self.clf_grad, alpha=0.3, cmap=plt.cm.coolwarm, antialiased=True)
+
         x, y = self.pool.get("test")
-        ax.scatter(x[:, 0], x[:, 1], marker='$O$', alpha=0.5, c=y.argmax(axis=-1), s=self.max_dot_size/2, cmap=plt.cm.coolwarm)
+        ax.scatter(x[:, 0], x[:, 1], marker='$*$', alpha=0.5, c=y.argmax(axis=-1), s=self.max_dot_size/2, cmap=plt.cm.coolwarm)
         
-        ax.set_title("Classifier Val/Test")
-        performance_string = f"Test {test_perf[1]['MulticlassAccuracy']:.1%}\nVal {val_perf[1]['MulticlassAccuracy']:.1%}"
+        ax.set_title("Classifier Test")
+        performance_string = f"Test {test_perf[1]['MulticlassAccuracy']:.1%}"
         ax.annotate(performance_string, xy=(0.03, 0.97), xycoords='axes fraction',
                     ha='left', va='top',
                     bbox=dict(boxstyle='round', fc='w'))
@@ -80,26 +83,22 @@ class Visualize:
 
 
 
-    def make_plots(self, chosen_idx, args, iter, val_perf, test_perf):
+    def make_plots(self, chosen_idx, args, iter, train_perf, val_perf, test_perf):
         fig, ax = plt.subplots(1, 3, figsize=(20, 5))
         self.compute_clf_grad()
-        self.clf_val(ax[0], test_perf, val_perf)
-        self.clf_train(ax[1])
+        self.clf_test(ax[0], test_perf)
+        self.clf_train(ax[1], train_perf, val_perf)
         self.acq_boundary(ax[2], chosen_idx)
         plt.suptitle(f"{str(args.algorithm).capitalize()} Iter:{iter} Random Seed:{args.random_seed}", fontsize="x-large")
         labeled_point = Line2D([0], [0], label='Labeled', marker='^', color='black', linestyle='')
         unlabeled_point = Line2D([0], [0], label='Unlabeled', marker='2', markersize=10, color='black', linestyle='')
-        val_points = Line2D([0], [0], label='Val', marker='x', color='black', linestyle='')
-        test_points = Line2D([0], [0], label='Test', marker='$O$', color='black', linestyle='')
-
+        test_points = Line2D([0], [0], label='Test', marker='*', color='black', linestyle='')
 
         chosen_point = Line2D([0], [0], label='Next added', marker='o',  markeredgewidth=2, markersize=8, markerfacecolor='grey', markeredgecolor='black', linestyle='')
         class_0 = mpatches.Patch(color=plt.cm.coolwarm(0), label='Class B')  
         class_1 = mpatches.Patch(color=plt.cm.coolwarm(255), label='Class A')  
 
-
-
-        legend_elements = [val_points, test_points, labeled_point, unlabeled_point, class_0, class_1, chosen_point]
+        legend_elements = [test_points, labeled_point, unlabeled_point, class_0, class_1, chosen_point]
         plt.figlegend(handles=legend_elements, loc='lower center', ncol=len(legend_elements), fancybox=True, shadow=True)
 
         path_to_store = f"results/aux/{args.dataset}/{args.algorithm}/plots/{args.random_seed}/"

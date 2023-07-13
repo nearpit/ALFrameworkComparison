@@ -1,8 +1,5 @@
 import torch
-import optuna
-from torch import nn
-
-from utilities import NN, EarlyStopper, Tuner
+from utilities import NN, EarlyStopper, Tuner, OnlineAvg
 
 class Learnable:
 
@@ -43,8 +40,6 @@ class Learnable:
                                        "batch_size":pool.batch_size})
         else:
             self.update_model_configs(model_configs)
-            self.tune_model()
-
 
     def __call__(self, x):
       with torch.no_grad():
@@ -80,9 +75,8 @@ class Learnable:
         self.model = self.initialize_model()
         self.model.to(self.device)
     
-    def eval_model(self, split_name):
-        total_loss = 0
-        loader = getattr(self.pool, f"{split_name}_loader")
+    def eval(self, loader):
+        total_loss = OnlineAvg()
         with torch.no_grad():
             for inputs, targets in loader:
 
@@ -98,16 +92,17 @@ class Learnable:
         return total_loss, self.model.metrics_set.flush()
 
     @initilize_first
-    def train_model(self, trial=None):
+    def fit(self, train_loader, val_loader, trial=None):
+
         self.reset_model()       # To bring the model to the same starting point
-
         self.model.eval()        # To disable Dropout 
-        
-        early_stopper = EarlyStopper()
-        for epoch_num in range(self.epochs):
-            train_loss = 0
 
-            for inputs, targets in self.pool.train_loader:
+        early_stopper = EarlyStopper()
+        train_loss = OnlineAvg()
+
+        for epoch_num in range(self.epochs):
+
+            for inputs, targets in train_loader:
 
                 targets = targets.to(self.device)
                 inputs = inputs.to(self.device)
@@ -122,17 +117,11 @@ class Learnable:
                 self.model.optimizer.step()
 
             train_metrics = self.model.metrics_set.flush()
-
-            val_loss, val_metrics = self.eval_model("val")
-
-            if trial:
-                trial.report(val_loss, epoch_num)
-                if trial.should_prune():
-                    raise optuna.exceptions.TrialPruned()
-                
+            val_loss, val_metrics = self.eval(val_loader)
             if early_stopper.early_stop(val_loss):
                 break
-
+        return (train_loss, train_metrics),  (val_loss, val_metrics)
+       
     def reset_model(self, seed=None):
         if seed is None:
             seed = self.random_seed
@@ -142,6 +131,15 @@ class Learnable:
                 if hasattr(layer, 'reset_parameters'):
                     layer.reset_parameters()
 
-    def tune_model(self):
-        self.update_model_configs(Tuner(pool=self.pool, model=self, tunable_hypers=self.tunable_hypers)())
-        self.train_model()
+    def tune_model(self, n_trials, tunable_hypers=None):
+        if tunable_hypers is None:
+            tunable_hypers = Tuner.all_hypers.copy()
+        if self.tunable_hypers:     
+            self.update_model_configs(Tuner(pool=self.pool, model=self, n_trials=n_trials, tunable_hypers=tunable_hypers)())
+        return self.train_model()
+
+    def train_model(self):
+        train_loader, val_loader = self.pool.splits_loaders
+        train_perf, val_perf = self.fit(train_loader=train_loader, val_loader=val_loader)
+        test_perf = self.eval(loader=self.pool.test_loader)
+        return train_perf, val_perf, test_perf

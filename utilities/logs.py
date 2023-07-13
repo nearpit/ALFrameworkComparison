@@ -1,5 +1,5 @@
 import pickle
-
+import os
 import utilities
 
 def gather_results(args, last_cand, test_perf, val_perf, pool, idx):
@@ -23,11 +23,14 @@ def get_name(args, include_alg=True):
     else:
         return f"{args.dataset}_{args.random_seed}"
 
-def store_results(array, filename, path="results/"):
+def store_file(array, filename, path="results/"):
     utilities.makedir(path)
     with open(f'{path}{filename}.pkl', 'wb') as file:
         pickle.dump(array, file)
 
 def retrieve_pkl(path):
-    with open(path, 'rb') as file:
-        return pickle.load(file)
+    if os.path.exists(path):
+        with open(path, 'rb') as file:
+            return pickle.load(file)
+    else:
+        return None

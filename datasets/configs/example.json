@@ -1,8 +1,7 @@
 {
     "n_features": 4,
     "n_instances": 1000, 
-    "n_labeled":20, 
-    "train_size":600,
+    "n_initial_label":20, 
     "n_classes": 3,
     "batch_size": 8,
     "budget":300,

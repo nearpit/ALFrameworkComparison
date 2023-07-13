@@ -31,10 +31,9 @@ class Toy(VectoralDataset):
 
     def split(self, data):
         x, y = data["x"], data["y"]
-        train_idx, val_idx, test_idx = self.conv_split(x.shape[0])
+        train_idx, test_idx = self.conv_split(x.shape[0], shares=[0.8])
 
         return {"train": {"x":x[train_idx], "y":y[train_idx]}, 
-                "val": {"x":x[val_idx], "y":y[val_idx]},
                 "test": {"x":x[test_idx], "y":y[test_idx]}}
     
     def make_circle(self, n_samples, scale_factor=1, along_x=0.5, along_y=0.25, noise=None):

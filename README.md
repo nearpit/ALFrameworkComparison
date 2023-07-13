@@ -32,10 +32,10 @@ pip install .
    8. __metrics_dict__ - metrics of the classifier
 
 ### \#TODO
-
-- [ ] Online Regularization(and/or)Learning Rate Tuning
+- [ ] Debug before found hypers
+- [ ] debug get_train_inst in pool
 - [ ] Sampling Keychain
-- [ ] Bring back dna n_labeled = 600 in configs
+- [ ] K Fold Validation
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
 - [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)
