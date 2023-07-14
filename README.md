@@ -49,4 +49,4 @@ L2, early stopping is off for now.
 
 Tuning:
 Ranges were expanded.
-Considering LR scheduler to be added and set staticly the architecture to the arbitarly sufficient one.  
+Considering LR scheduler to be added while LR set to 0.5 and set staticly the architecture to the arbitarly sufficient one.  
