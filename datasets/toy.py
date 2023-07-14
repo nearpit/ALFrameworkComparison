@@ -18,7 +18,7 @@ class Toy(VectoralDataset):
 
     def obtain(self):
         non_honeypot_size = self.configs["n_instances"] - self.configs["n_honeypot"]
-        x, y = make_moons(n_samples=non_honeypot_size, noise=0.15, random_state=self.random_seed)
+        x, y = make_moons(n_samples=non_honeypot_size, noise=0.05, random_state=self.random_seed)
         # x_hp, _ = make_blobs(n_samples=self.configs["n_honeypot"], centers=1, cluster_std=[0.2], center_box=(2, 0), random_state=self.random_seed)
         x_hp = self.make_circle(n_samples=self.configs["n_honeypot"], scale_factor=2.5, along_x=0.5, noise=0.15)
         y_hp = np.tile(np.array([0, 1]), int(self.configs["n_honeypot"]/2))

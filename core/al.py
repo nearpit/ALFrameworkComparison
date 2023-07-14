@@ -5,9 +5,9 @@ import acquisitions, datasets, core, utilities
 
 class ActiveLearning:
     #DEBUG
-    whole_arch_ntrials = 100
-    finetune_ntrials = 40
-    finetune_params = ['weight_decay', 'lr']
+    whole_arch_ntrials = 50
+    finetune_ntrials = 50
+    finetune_params = ["layers_size", "weight_decay", "lr"]
     
     def __init__(self, args):
         Dataclass = getattr(datasets, args.dataset.capitalize())
@@ -15,10 +15,10 @@ class ActiveLearning:
         self.random_seed = args.random_seed
         self.args = args
         Acqclass = getattr(acquisitions, args.algorithm.capitalize())
-        self.pool = core.Pool(data=Dataclass.get_data_dict(), random_seed=self.random_seed)
+        self.pool = core.Pool(data=Dataclass.get_data_dict(), torch_seed=self.random_seed)
 
-        self.hyper_path = "results/aux/hypers/"
-        self.hyper_filename = utilities.get_name(self.args, include_alg=False) + "_best_hypers.pkl"
+        self.hyper_path = f"results/aux/{args.dataset}/hypers/"
+        self.hyper_filename = str(args.random_seed) + ".pkl"
         self.best_hypers = utilities.retrieve_pkl(self.hyper_path + self.hyper_filename)
         self.clf = core.Learnable(pool=self.pool, 
                                   model_configs=self.best_hypers,
@@ -38,7 +38,7 @@ class ActiveLearning:
             hypers = self.clf.model_configs.copy()
             utilities.store_file(hypers, filename=self.hyper_filename, path=self.hyper_path)
 
-        logging.warning(f'{train_perf} {val_perf} {test_perf} {abs_idx} {self.pool.get_len("labeled")} {self.pool.get_len("unlabeled")} {utilities.get_name(args=self.args)}')
+        logging.warning(f'{abs_idx} {self.pool.get_len("labeled")} {self.pool.get_len("unlabeled")} {utilities.get_name(args=self.args)}\n{train_perf}\n{val_perf}\n{test_perf}')
 
         for idx in range(self.budget):
 
@@ -51,6 +51,6 @@ class ActiveLearning:
             train_perf, val_perf, test_perf = self.clf.tune_model(tunable_hypers=self.finetune_params,n_trials=self.finetune_ntrials)
 
             # LOGGINGS
-            logging.warning(f'{train_perf} {val_perf} {test_perf} {abs_idx} {self.pool.get_len("labeled")} {self.pool.get_len("unlabeled")} {utilities.get_name(args=self.args)}')
+            logging.warning(f'{abs_idx} {self.pool.get_len("labeled")} {self.pool.get_len("unlabeled")} {utilities.get_name(args=self.args)}\n{train_perf}\n{val_perf}\n{test_perf}')
             results.append(utilities.gather_results(self.args, abs_idx, test_perf, val_perf, self.pool, idx))
             utilities.store_file(results, utilities.get_name(self.args))

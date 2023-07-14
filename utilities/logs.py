@@ -25,7 +25,7 @@ def get_name(args, include_alg=True):
 
 def store_file(array, filename, path="results/"):
     utilities.makedir(path)
-    with open(f'{path}{filename}.pkl', 'wb') as file:
+    with open(f'{path}{filename}', 'wb') as file:
         pickle.dump(array, file)
 
 def retrieve_pkl(path):

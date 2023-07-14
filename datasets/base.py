@@ -49,7 +49,7 @@ class VectoralDataset(Dataset):
         return self.x[idx], self.y[idx]
   
     def file_exists(self):
-        splits = ["train.npz", "val.npz", "test.npz"]
+        splits = ["train.npz", "test.npz"]
         existed_files = os.listdir(self.location)
         return all([elem in existed_files for elem in splits])
     
@@ -82,9 +82,10 @@ class VectoralDataset(Dataset):
                 "test": cls(split_name="test")}
     
     @staticmethod
-    def conv_split(array_size, shares=[0.6, 0.2]):
+    def conv_split(array_size, shares=[0.6, 0.2], seed=42):
         indices = np.arange(array_size)
         idx_to_split = (np.cumsum(shares)*array_size).astype(int)
+        np.random.seed(seed)
         permutated_idx = np.random.choice(indices, array_size, replace=False)
         return np.split(permutated_idx, idx_to_split)
 

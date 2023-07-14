@@ -1,26 +1,33 @@
+import random
 import numpy as np
+import torch
 from torch.utils.data import DataLoader, Subset
-from sklearn.model_selection import KFold
+from sklearn.model_selection import RepeatedKFold
 
 import datasets
 
 
 class Pool:
-    k_folds = 4
+    k_folds = 2
+    n_repeats = 20
+    split_seed = 42
 
-    def __init__(self, data, whole_dataset=False, **kwargs):
-        np.random.seed(42)
+    def __init__(self, data, torch_seed, whole_dataset=False, **kwargs):
+        self.torch_seed = torch_seed
+        self.set_seed(self.split_seed)
         self.__dict__.update(**data["train"].configs)
         self.data = data
         self.idx_intact = np.arange(len(self.data["train"].x))
 
         if whole_dataset:
             self.n_initial_label = self.budget
-
+        
         self.idx_lb = np.random.choice(self.idx_intact, size=self.n_initial_label, replace=False)
+        
+        self.set_seed(self.split_seed)
         self.test_loader = DataLoader(data["test"], batch_size=self.batch_size, shuffle=False)
 
-        self.k_folder = KFold(n_splits=self.k_folds, shuffle=True, random_state=42)
+        self.k_folder = RepeatedKFold(n_splits=self.k_folds, n_repeats=self.n_repeats, random_state=42)
 
     @property
     def labeled_set(self):
@@ -31,8 +38,11 @@ class Pool:
     
     @property
     def splits_loaders(self):
-        train_idx, val_idx = datasets.VectoralDataset.conv_split(self.get_len("labeled"), shares=[1/self.k_folds])
+        self.set_seed(self.split_seed)
+        train_idx, val_idx = datasets.VectoralDataset.conv_split(self.get_len("labeled"), shares=[0.5])
         train_loader = DataLoader(Subset(self.labeled_set, train_idx), shuffle=True, drop_last=self.drop_last)
+        
+        self.set_seed(self.split_seed)
         val_loader = DataLoader(Subset(self.labeled_set, val_idx), shuffle=False)
         return train_loader, val_loader
 
@@ -69,3 +79,13 @@ class Pool:
             return self.data["val"][:]
         elif pool == "test":
             return self.data["test"][:]
+        
+    def set_seed(self, seed=None):
+        if seed is None:
+            seed = self.torch_seed
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        np.random.seed(seed)
+        random.seed(seed)

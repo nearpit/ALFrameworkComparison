@@ -43,7 +43,7 @@ class NN(nn.Module):
 
 class EarlyStopper:
                     #DEBUG
-    def __init__(self, patience=10, min_delta=0, starts_with=0):
+    def __init__(self, patience=500, min_delta=0, starts_with=0):
         self.patience = patience
         self.min_delta = min_delta
         self.counter = starts_with

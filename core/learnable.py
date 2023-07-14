@@ -28,7 +28,6 @@ class Learnable:
         
         self.random_seed = random_seed
         # Reproducibility
-        torch.manual_seed(random_seed)
         self.pool = pool
         self.model_arch_name = model_arch_name
         self.model_configs = self.model_configs[model_arch_name].copy()
@@ -65,13 +64,11 @@ class Learnable:
         return wrapper
     
     def initialize_model(self):
+        self.pool.set_seed()
         return self.model_class(self.device, **self.model_configs)
     
-    def update_model_configs(self, new_configs, seed=None):
+    def update_model_configs(self, new_configs):
         self.model_configs.update(new_configs)
-        if seed is None:
-            seed = self.random_seed
-        torch.manual_seed(seed)
         self.model = self.initialize_model()
         self.model.to(self.device)
     
@@ -122,10 +119,8 @@ class Learnable:
                 break
         return (train_loss, train_metrics),  (val_loss, val_metrics)
        
-    def reset_model(self, seed=None):
-        if seed is None:
-            seed = self.random_seed
-        torch.manual_seed(seed)
+    def reset_model(self):
+        self.pool.set_seed()
         for seq in self.model.children():
             for layer in seq.modules():
                 if hasattr(layer, 'reset_parameters'):

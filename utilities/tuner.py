@@ -19,7 +19,6 @@ class Tuner(BaseClass):
                                               # How many fold it warms up
     pruner_configs = {"n_startup_trials": 5, "n_warmup_steps": 3}
     study_configs = {"pruner": optuna.pruners.MedianPruner(**pruner_configs)}
-    seed = 42
 
     #CAVEAT check the objective direction   #DEBUG  
     def __init__(self, n_trials,  tunable_hypers, direction="minimize", *args, **kwargs):    
@@ -28,7 +27,7 @@ class Tuner(BaseClass):
         self.tunable_hypers = tunable_hypers
         self.n_trials = n_trials  
         self.study_configs["direction"] = direction
-        self.study_configs["sampler"] = optuna.samplers.TPESampler(seed=self.seed)
+        self.study_configs["sampler"] = optuna.samplers.TPESampler(seed=self.pool.split_seed)
 
 
     def __call__(self):
@@ -61,9 +60,9 @@ class Tuner(BaseClass):
 class Objective(BaseClass):
     params_ranges = {
         "weight_decay": {"low": 1e-7, "high":1e-1, "log":True},
-        "depth": {"low": 2, "high":5},
-        "width": {"low": 4, "high": 92},
-        "lr": {"low": 1e-6, "high":1e-1}
+        "depth": {"low": 1, "high":8},
+        "width": {"low": 2, "high": 128},
+        "lr": {"low": 1e-6, "high":1}
         }
 
     def __init__(self, tunable_hypers, *args, **kwargs):
@@ -80,12 +79,12 @@ class Objective(BaseClass):
         self.model.update_model_configs(suggest_dict)
         val_loss = utilities.OnlineAvg()
         for fold_num, (train_ds, val_ds) in enumerate(self.pool.train_folder):
-            
+            self.pool.set_seed(self.pool.split_seed)
             train_loader =  DataLoader(Subset(self.pool.labeled_set, train_ds), 
                                         batch_size=self.pool.batch_size, 
-                                        shuffle=True, 
+                                        # shuffle=True, 
                                         drop_last=self.pool.drop_last)
-            
+            self.pool.set_seed(self.pool.split_seed)
             val_loader =  DataLoader(Subset(self.pool.labeled_set, val_ds), 
                                      batch_size=self.pool.batch_size,
                                      drop_last=False)
