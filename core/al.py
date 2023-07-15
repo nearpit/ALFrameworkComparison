@@ -5,9 +5,9 @@ import acquisitions, datasets, core, utilities
 
 class ActiveLearning:
     #DEBUG
-    whole_arch_ntrials = 50
-    finetune_ntrials = 50
-    finetune_params = ["layers_size", "weight_decay", "lr"]
+    whole_arch_ntrials = 5
+    finetune_ntrials = 5
+    finetune_params = {"weight_decay", "lr"}
     
     def __init__(self, args):
         Dataclass = getattr(datasets, args.dataset.capitalize())
@@ -17,14 +17,13 @@ class ActiveLearning:
         Acqclass = getattr(acquisitions, args.algorithm.capitalize())
         self.pool = core.Pool(data=Dataclass.get_data_dict(), torch_seed=self.random_seed)
 
-        self.hyper_path = f"results/aux/{args.dataset}/hypers/"
+        self.hyper_path = f"temp/hypers/{args.dataset}/"
         self.hyper_filename = str(args.random_seed) + ".pkl"
         self.best_hypers = utilities.retrieve_pkl(self.hyper_path + self.hyper_filename)
         self.clf = core.Learnable(pool=self.pool, 
                                   model_configs=self.best_hypers,
                                   random_seed=self.random_seed)
         self.acq = Acqclass(clf=self.clf, pool=self.pool, random_seed=self.random_seed)
-        self.retuner = utilities.EarlyStopper(patience=args.hindered_iters)
         if args.visualizer:
             self.visualizer = utilities.Visualize(self.pool, self.clf, self.acq)
        

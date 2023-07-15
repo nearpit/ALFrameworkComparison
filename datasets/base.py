@@ -49,7 +49,7 @@ class VectoralDataset(Dataset):
         return self.x[idx], self.y[idx]
   
     def file_exists(self):
-        splits = ["train.npz", "test.npz"]
+        splits = ["train.npz", "val.npz", "test.npz"]
         existed_files = os.listdir(self.location)
         return all([elem in existed_files for elem in splits])
     
@@ -79,6 +79,7 @@ class VectoralDataset(Dataset):
     @classmethod
     def get_data_dict(cls):
         return {"train": cls(split_name="train"), 
+                "val": cls(split_name="val"),
                 "test": cls(split_name="test")}
     
     @staticmethod

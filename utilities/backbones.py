@@ -14,7 +14,6 @@ class NN(nn.Module):
                  batch_size, 
                  drop_rate=0.15, # there is no droprate during training - only for BALD within predictions
                  optimizer="SGD",
-                 early_stop=True,
                  *args, **kwargs):
         
         super().__init__(*args, **kwargs)
@@ -34,7 +33,6 @@ class NN(nn.Module):
         self.optimizer = getattr(optim, optimizer)(self.parameters(), lr=lr, weight_decay=weight_decay)
         self.criterion = getattr(nn, criterion)()
 
-        self.early_stop = early_stop
         self.batch_size = batch_size
 
     def forward(self, x):

@@ -1,16 +1,15 @@
 import random
 import numpy as np
 import torch
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader, Subset, ConcatDataset
 from sklearn.model_selection import RepeatedKFold
 
 import datasets
 
 
 class Pool:
-    k_folds = 2
-    n_repeats = 20
     split_seed = 42
+    repeats = 2
 
     def __init__(self, data, torch_seed, whole_dataset=False, **kwargs):
         self.torch_seed = torch_seed
@@ -22,34 +21,42 @@ class Pool:
         if whole_dataset:
             self.n_initial_label = self.budget
         
+        self.set_seed(self.split_seed)
+
         self.idx_lb = np.random.choice(self.idx_intact, size=self.n_initial_label, replace=False)
-        
+
+        self.set_seed(self.split_seed)
+        self.train_val_dataset = ConcatDataset([self.labeled_dataset, self.data["val"]])
+
         self.set_seed(self.split_seed)
         self.test_loader = DataLoader(data["test"], batch_size=self.batch_size, shuffle=False)
 
-        self.k_folder = RepeatedKFold(n_splits=self.k_folds, n_repeats=self.n_repeats, random_state=42)
-
-    @property
-    def labeled_set(self):
-        return Subset(self.data['train'], self.idx_lb)
-    @property
-    def train_folder(self):
-        return self.k_folder.split(self.labeled_set)
-    
-    @property
-    def splits_loaders(self):
         self.set_seed(self.split_seed)
-        train_idx, val_idx = datasets.VectoralDataset.conv_split(self.get_len("labeled"), shares=[0.5])
-        train_loader = DataLoader(Subset(self.labeled_set, train_idx), shuffle=True, drop_last=self.drop_last)
+        self.val_loader = DataLoader(data["val"], batch_size=self.batch_size, shuffle=False)
         
         self.set_seed(self.split_seed)
-        val_loader = DataLoader(Subset(self.labeled_set, val_idx), shuffle=False)
-        return train_loader, val_loader
+        self.k_folder = RepeatedKFold(n_splits=int(data["val"].x.shape[0]/self.n_initial_label), 
+                                      n_repeats=self.repeats, 
+                                      random_state=self.split_seed)
+
+    @property
+    def labeled_dataset(self):
+        return Subset(self.data['train'], self.idx_lb)
+       
+    @property
+    def train_val_kfold(self):
+        return self.k_folder.split(self.train_val_dataset)
+    
+    @property
+    def train_loader(self):
+        self.set_seed(self.split_seed)
+        loader = DataLoader(self.labeled_dataset, batch_size=self.batch_size, shuffle=True, drop_last=self.drop_last)
+        return loader
 
     @property
     def drop_last(self):
         # drop last if the number of labeled instances is bigger than the batch_size
-        return int(self.get_len("labeled")/self.k_folds) > self.batch_size 
+        return self.get_len("labeled") > self.batch_size 
 
     @property
     def idx_ulb(self):
