@@ -125,10 +125,10 @@ class Learnable:
                 if hasattr(layer, 'reset_parameters'):
                     layer.reset_parameters()
 
-    def tune_model(self, n_trials, tunable_hypers=None):
+    def tune_model(self, n_trials, use_kfold=False, tunable_hypers=None):
         if tunable_hypers is None:
             tunable_hypers = Tuner.all_hypers.copy()
-        self.update_model_configs(Tuner(pool=self.pool, model=self, n_trials=n_trials, tunable_hypers=tunable_hypers)())
+        self.update_model_configs(Tuner(pool=self.pool, model=self, n_trials=n_trials, tunable_hypers=tunable_hypers, use_kfold=use_kfold)())
         return self.train_model()
 
     def train_model(self):

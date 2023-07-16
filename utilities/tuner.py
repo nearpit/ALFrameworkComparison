@@ -6,11 +6,11 @@ import utilities
 class BaseClass:
     all_hypers = {"lr", "weight_decay", "layers_size"}
 
-    def __init__(self, pool, model, tunable_hypers):
+    def __init__(self, pool, model, tunable_hypers, use_kfold):
         self.pool = pool
         self.model = model
         self.tunable_hypers = tunable_hypers
-        self.general_tuning = self.all_hypers == self.tunable_hypers
+        self.use_kfold = use_kfold
 
     def add_input_output_size(self, layers_size):
         layers_size.insert(0, self.pool.n_features)
@@ -33,7 +33,7 @@ class Tuner(BaseClass):
 
     def __call__(self):
         study = optuna.create_study(**self.study_configs)
-        study.optimize(Objective(model=self.model, pool=self.pool, tunable_hypers=self.tunable_hypers), n_trials=self.n_trials)
+        study.optimize(Objective(model=self.model, pool=self.pool, tunable_hypers=self.tunable_hypers, use_kfold=self.use_kfold), n_trials=self.n_trials)
         return self.align_params(study.best_params)
     
     
@@ -78,7 +78,7 @@ class Objective(BaseClass):
         suggest_dict = self.suggest_params(trial)
         self.model.update_model_configs(suggest_dict)
         val_loss = utilities.OnlineAvg()
-        if self.general_tuning:
+        if self.use_kfold:
             for fold_num, (train_ds, val_ds) in enumerate(self.pool.train_val_kfold):
                 self.pool.set_seed(self.pool.split_seed)
                 train_loader =  DataLoader(Subset(self.pool.train_val_dataset, train_ds), 

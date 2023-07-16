@@ -5,7 +5,7 @@
     "n_initial_label": 20, 
     "n_classes": 2,
     "batch_size": 8,
-    "budget": 200,
+    "budget": 300,
     "metrics_dict": {
         "MulticlassAccuracy": {
             "num_classes": 2

@@ -78,10 +78,7 @@ class Moons(Toy):
         super().__init__(*args, **kwargs)
 
     def generate_noise(self):
-        return make_blobs(n_samples=self.configs["n_honeypot"], 
-                          centers=[(4, 3)],
-                          cluster_std=[1],
-                          random_state=self.random_seed)
+        return self.make_circle(n_samples=self.configs["n_honeypot"], scale_factor=2.5, noise=0.1), None
 
     
     def generate_clean(self):
