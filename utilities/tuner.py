@@ -1,3 +1,4 @@
+import copy
 import optuna
 from torch.utils.data import DataLoader, Subset
 
@@ -6,11 +7,10 @@ import utilities
 class BaseClass:
     all_hypers = {"lr", "weight_decay", "layers_size"}
 
-    def __init__(self, pool, model, tunable_hypers, use_kfold):
+    def __init__(self, pool, clf, tunable_hypers):
         self.pool = pool
-        self.model = model
+        self.clf = clf
         self.tunable_hypers = tunable_hypers
-        self.use_kfold = use_kfold
 
     def add_input_output_size(self, layers_size):
         layers_size.insert(0, self.pool.n_features)
@@ -19,22 +19,32 @@ class BaseClass:
     
 class Tuner(BaseClass):
                                               # How many fold it warms up
-    pruner_configs = {"n_startup_trials": 5, "n_warmup_steps": 500}
-    study_configs = {"pruner": optuna.pruners.MedianPruner(**pruner_configs)}
+    pruner_configs = {"n_startup_trials": 5}
+    study_configs = {}
+    share_warmup_steps = 0.8
 
     #CAVEAT check the objective direction   #DEBUG  
-    def __init__(self, n_trials, direction="minimize", *args, **kwargs):    
+    def __init__(self, n_trials, previous_loss=None, direction="minimize", *args, **kwargs):    
         super().__init__(*args, **kwargs)
         # optuna.logging.set_verbosity(optuna.logging.WARNING) #DEBUG
+        if previous_loss:
+            self.callbacks = [StopWhenFoundBetter(previous_loss)]
+        else:
+            self.callbacks = []
         self.n_trials = n_trials  
+        self.study_configs["pruner"] = optuna.pruners.MedianPruner(n_warmup_steps=int((self.pool.n_splits)*self.share_warmup_steps), **self.pruner_configs)
         self.study_configs["direction"] = direction
         self.study_configs["sampler"] = optuna.samplers.TPESampler(seed=self.pool.split_seed)
 
 
     def __call__(self):
         study = optuna.create_study(**self.study_configs)
-        study.optimize(Objective(model=self.model, pool=self.pool, tunable_hypers=self.tunable_hypers, use_kfold=self.use_kfold), n_trials=self.n_trials)
-        return self.align_params(study.best_params)
+        study.optimize(Objective(clf=self.clf, 
+                                 pool=self.pool,
+                                 tunable_hypers=self.tunable_hypers), 
+                       n_trials=self.n_trials,
+                       callbacks=self.callbacks)
+        return self.align_params(study.best_params), study.best_trial.user_attrs["avg_val_loss"]
     
     
     def align_params(self, best_params):
@@ -50,7 +60,7 @@ class Tuner(BaseClass):
             layers_size = []
             for idx, _ in enumerate(width_dict.keys()):
                 layers_size.append(width_dict[f"width_{idx}"])
-            if self.model.model_arch_name  == "AE":
+            if self.clf.model_arch_name  == "AE":
                 # TODO check whether it works correctly
                 layers_size.extend(layers_size[1::-1])
             
@@ -60,41 +70,35 @@ class Tuner(BaseClass):
 
 class Objective(BaseClass):
     ranges = {
-        "weight_decay": {"low": 1e-7, "high":1e-1, "log":True},
-        "depth": {"low": 1, "high":4},
+        "weight_decay": {"low": 1e-6, "high":1e-1, "log":True},
+        "depth": {"low": 1, "high":5},
         "width": {"low": 2, "high": 96},
-        "lr": {"low": 1e-6, "high":1e-1}
+        "lr": {"low": 1e-4, "high":5e-1}
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if "MLP" in self.model.model_arch_name:
+        if "MLP" in self.clf.model_arch_name:
             self.define_func = self.define_MLP
-        elif "AE" in self.model.model_arch_name:
+        elif "AE" in self.clf.model_arch_name:
             self.define_func = self.define_AE
 
 
     def __call__(self, trial):
         suggest_dict = self.suggest_params(trial)
-        self.model.update_model_configs(suggest_dict)
+        self.clf.update_model_configs(suggest_dict)
         val_loss = utilities.OnlineAvg()
-        if self.use_kfold:
-            for fold_num, (train_ds, val_ds) in enumerate(self.pool.train_val_kfold):
-                self.pool.set_seed(self.pool.split_seed)
-                train_loader =  DataLoader(Subset(self.pool.train_val_dataset, train_ds), 
-                                            batch_size=self.pool.batch_size, 
-                                            shuffle=True)
-                self.pool.set_seed(self.pool.split_seed)
-                val_loader =  DataLoader(Subset(self.pool.train_val_dataset, val_ds), 
-                                        batch_size=self.pool.batch_size,
-                                        drop_last=False)
-                train_perf, val_perf = self.model.fit(train_loader=train_loader, val_loader=val_loader)
-                val_loss += float(val_perf[0])
-                print(fold_num, suggest_dict, val_perf)
-        else:
-            train_perf, val_perf = self.model.fit(train_loader=self.pool.train_loader, val_loader=self.pool.val_loader)
-            val_loss = val_perf[0]
-        return val_loss
+        for fold_num, (train_idx, val_idx) in enumerate(self.pool.unviolated_splitter):
+            train_loader, val_loader = self.pool.get_train_val_loaders(train_idx, val_idx)
+            train_perf, val_perf = self.clf.fit(train_loader=train_loader, val_loader=val_loader)
+            val_loss += float(val_perf[0])
+            print(fold_num, suggest_dict, val_perf)
+
+            trial.report(float(val_loss), fold_num)
+            if trial.should_prune():
+                raise optuna.TrialPruned()
+        trial.set_user_attr("avg_val_loss", val_loss)
+        return float(val_loss)
 
 
     def suggest_params(self, trial):
@@ -108,7 +112,7 @@ class Objective(BaseClass):
                 else:
                     raise Exception("Something is wrong with the tuning process")
             else:
-                suggest_dict[key] = trial.suggest_categorical(key, [self.model.model_configs[key]]) # the given hyper
+                suggest_dict[key] = trial.suggest_categorical(key, [self.clf.model_configs[key]]) # the given hyper
         return suggest_dict
     
     def define_MLP(self, trial):
@@ -116,7 +120,6 @@ class Objective(BaseClass):
         depth = trial.suggest_int("depth", **self.ranges["depth"])
         for idx in range(depth):
             layers_size.append(trial.suggest_int(f"width_{idx}", **self.ranges["width"]))
-
         return layers_size
 
     # def define_AE(self, trial):
@@ -132,6 +135,17 @@ class Objective(BaseClass):
     #         layers_size.insert(-i, current_width)
     #         current_width = trial.suggest_int(f"width_{i}", bottleneck, current_width - 1) # -1 to exclude upper bound
     #         i += 1
-
     #     return layers_size
-   
+
+class StopWhenFoundBetter:
+    def __init__(self, previous_loss):
+        self.previous_loss = float(previous_loss)
+
+    def __call__(self, study, trial):
+        if study.direction.name == "MINIMIZE":
+            if study.best_value < self.previous_loss:
+                study.stop()
+        elif study.direction.name == "MAXIMIZE":
+            if study.best_value > self.previous_loss:
+                study.stop()
+ 

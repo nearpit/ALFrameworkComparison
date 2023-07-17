@@ -6,7 +6,7 @@ from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from datasets.base import VectoralDataset
 
 class Toy(VectoralDataset):
-
+    visualize = True
     feature_encoder = MinMaxScaler()
     target_encoder = OneHotEncoder(sparse_output=False)
 
@@ -18,10 +18,9 @@ class Toy(VectoralDataset):
 
     def split(self, data):
         x, y = data["x"], data["y"]
-        train_idx, val_idx, test_idx = self.conv_split(x.shape[0])
+        train_idx, test_idx = self.conv_split(x.shape[0], shares=[0.8])
 
         return {"train": {"x":x[train_idx], "y":y[train_idx]}, 
-                "val" : {"x":x[val_idx], "y": y[val_idx]},
                 "test": {"x":x[test_idx], "y":y[test_idx]}}
     
     def obtain(self):
@@ -83,6 +82,6 @@ class Moons(Toy):
     
     def generate_clean(self):
         return make_moons(n_samples=self.configs["n_instances"] - self.configs["n_honeypot"],
-                          noise=0.1,
+                          noise=0.05,
                           random_state=self.random_seed)
         

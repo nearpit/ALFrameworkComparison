@@ -1,7 +1,7 @@
 {
     "n_features": 60,
     "n_instances": 3175, 
-    "n_initial_label": 10, 
+    "n_initial_labeled": 10, 
     "n_classes": 2,
     "batch_size": 32,
     "budget": 300,

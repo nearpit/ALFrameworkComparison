@@ -13,7 +13,7 @@ def gather_results(args, last_cand, test_perf, val_perf, pool, idx):
             "val_loss": val_perf[0],
             "val_acc": val_perf[1]["MulticlassAccuracy"],
             "len_ulb": pool.get_len("unlabeled"),
-            "len_lb": pool.get_len("labeled"), 
+            "len_lb": pool.get_len("all_labeled"), 
             "iter": idx
         }
     

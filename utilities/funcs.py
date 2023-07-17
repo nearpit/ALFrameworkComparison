@@ -2,16 +2,6 @@ import os
 from argparse import ArgumentParser
 import argparse
 
-def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
 
 def get_arguments():
     parser = ArgumentParser()
@@ -32,14 +22,10 @@ def get_arguments():
                         type=int,
                         default=42)
     
-    parser.add_argument("-hi", "--hindered_iters",
-                        help="How many hindered iterations should happen to retune the classifier",
-                        type=int,
-                        default=10)
-    parser.add_argument("-v", "--visualizer",
-                    help="Whether to visualize the learning process",
-                    type=str2bool,
-                    default=False)
+    parser.add_argument("-vs", "--val_share",
+                    help="What share of labeled instances to use for validation",
+                    type=float,
+                    default=0.5)
     return parser.parse_args()
 
 def makedir(path):

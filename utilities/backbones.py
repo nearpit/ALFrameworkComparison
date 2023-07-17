@@ -41,22 +41,27 @@ class NN(nn.Module):
 
 class EarlyStopper:
                     #DEBUG
-    def __init__(self, patience=500, min_delta=0, starts_with=0):
+    def __init__(self, patience, min_delta=0, n_warmup_epochs=0):
         self.patience = patience
         self.min_delta = min_delta
-        self.counter = starts_with
+        self.idx = -1
+        self.counter = 0
+        self.n_warmup_epochs = n_warmup_epochs
         self.min_validation_loss = float("Inf")
 
     def early_stop(self, validation_loss):
-        if validation_loss <= self.min_validation_loss:
-            self.min_validation_loss = validation_loss
-            self.counter = 0
-        elif validation_loss > (self.min_validation_loss + self.min_delta):
-            self.counter += 1
-            if self.counter >= self.patience:
+        self.idx += 1
+
+        if self.idx > self.n_warmup_epochs:
+            if validation_loss <= self.min_validation_loss:
+                self.min_validation_loss = validation_loss
                 self.counter = 0
-                self.min_validation_loss = float("Inf")
-                return True
+            elif validation_loss > (self.min_validation_loss + self.min_delta):
+                self.counter += 1
+                if self.counter >= self.patience:
+                    self.counter = 0
+                    self.min_validation_loss = float("Inf")
+                    return True
         return False
     
 class MetricsSet:

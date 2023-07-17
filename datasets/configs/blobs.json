@@ -2,7 +2,7 @@
     "n_features": 2,
     "n_instances": 500, 
     "n_honeypot": 100, 
-    "n_initial_label": 20, 
+    "n_initial_labeled": 20, 
     "n_classes": 2,
     "batch_size": 8,
     "budget": 200,

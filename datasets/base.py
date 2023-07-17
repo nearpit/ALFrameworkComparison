@@ -7,7 +7,7 @@ from torch.utils.data import Dataset
 from sklearn.datasets import load_svmlight_file
 
 class VectoralDataset(Dataset):
-
+    visualize = False
     dataset_name = None
     feature_encoder = None
     target_encoder = None
@@ -49,7 +49,7 @@ class VectoralDataset(Dataset):
         return self.x[idx], self.y[idx]
   
     def file_exists(self):
-        splits = ["train.npz", "val.npz", "test.npz"]
+        splits = ["train.npz", "test.npz"]
         existed_files = os.listdir(self.location)
         return all([elem in existed_files for elem in splits])
     
@@ -79,7 +79,6 @@ class VectoralDataset(Dataset):
     @classmethod
     def get_data_dict(cls):
         return {"train": cls(split_name="train"), 
-                "val": cls(split_name="val"),
                 "test": cls(split_name="test")}
     
     @staticmethod

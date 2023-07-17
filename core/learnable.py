@@ -1,12 +1,15 @@
 import torch
+from torch.utils.data import Subset, ConcatDataset, DataLoader
+
 from utilities import NN, EarlyStopper, Tuner, OnlineAvg
 
 class Learnable:
 
     #DEBUG
-    epochs=1000
-    patience=100
-
+    epochs = 1000
+    patience = 20
+    n_warmup_epochs = 100
+    avg_val_loss = 0.
     model = None
     model_class = NN
     model_configs = {"MLP_clf": {"last_activation": "Softmax",
@@ -91,9 +94,8 @@ class Learnable:
     def fit(self, train_loader, val_loader, trial=None):
 
         self.reset_model()       # To bring the model to the same starting point
-
         self.model.eval()        # To disable Dropout 
-        early_stopper = EarlyStopper(self.patience)
+        early_stopper = EarlyStopper(patience=self.patience, n_warmup_epochs=self.n_warmup_epochs)
         train_loss = OnlineAvg()
 
         for epoch_num in range(self.epochs):
@@ -125,13 +127,21 @@ class Learnable:
                 if hasattr(layer, 'reset_parameters'):
                     layer.reset_parameters()
 
-    def tune_model(self, n_trials, use_kfold=False, tunable_hypers=None):
+    def tune_model(self, n_trials, tunable_hypers=None):
         if tunable_hypers is None:
             tunable_hypers = Tuner.all_hypers.copy()
-        self.update_model_configs(Tuner(pool=self.pool, model=self, n_trials=n_trials, tunable_hypers=tunable_hypers, use_kfold=use_kfold)())
+        new_configs, avg_val_loss = Tuner(pool=self.pool,
+                                    clf=self,
+                                    n_trials=n_trials,
+                                    tunable_hypers=tunable_hypers,
+                                    previous_loss=self.avg_val_loss)()
+        self.avg_val_loss = avg_val_loss
+        self.update_model_configs(new_configs)
         return self.train_model()
 
     def train_model(self):
-        train_perf, val_perf = self.fit(train_loader=self.pool.train_loader, val_loader=self.pool.val_loader)
+        unviolated_train_idx, unviolated_val_idx = next(self.pool.unviolated_splitter)
+        train_loader, val_loader = self.pool.get_train_val_loaders(unviolated_train_idx, unviolated_val_idx)
+        train_perf, val_perf = self.fit(train_loader=train_loader, val_loader=val_loader)
         test_perf = self.eval(loader=self.pool.test_loader)
         return train_perf, val_perf, test_perf
