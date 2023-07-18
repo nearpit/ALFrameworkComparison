@@ -32,8 +32,6 @@ pip install .
    8. __metrics_dict__ - metrics of the classifier
 
 ### \#TODO
-- [ ] Make CSV results storing 
-- [ ] Add % initially labeled to the run config file 
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
 - [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)
