@@ -32,9 +32,6 @@ pip install .
    8. __metrics_dict__ - metrics of the classifier
 
 ### \#TODO
-- [ ] Plot loss/accuracy during AL procedure
-- [ ] Rewrite dataset configs and pool to align to the n_labeled parameter
-- [ ] Store best validation loss and compare with it (not the previous one)
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
 - [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)
