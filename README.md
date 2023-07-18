@@ -38,7 +38,7 @@ pip install .
 
 ## Online Tuning
 
-100 tuning trials
-Budget 30 %
-N initially labeled: [0.5%, 2.5%, 5%, 10%]
-Validation share: [5%, 25%, 50%, 75%, 95%]
+* 100 tuning trials
+* Budget 30 %
+* N initially labeled: [0.5%, 2.5%, 5%, 10%]
+* Validation share: [5%, 25%, 50%, 75%, 95%]
