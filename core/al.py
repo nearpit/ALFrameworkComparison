@@ -5,7 +5,7 @@ import acquisitions, datasets, core, utilities
 class ActiveLearning:
     #DEBUG
     whole_arch_ntrials = 50
-    finetune_ntrials = 25
+    finetune_ntrials = 50
     # finetune_params = {"weight_decay", "lr"}
     
     def __init__(self, args):
@@ -41,7 +41,7 @@ class ActiveLearning:
         for idx in range(self.budget):
 
             abs_idx, relative_idx = self.acq.query()
-            if hasattr(self, "visualizer"):
+            if hasattr(self, "visualizer") and self.acq.__class__.__name__ != "Cheating":
                 self.visualizer.make_plots(relative_idx, self.args, idx, train_perf, val_perf, test_perf)
 
             self.pool.add_new_inst(abs_idx)
