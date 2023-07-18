@@ -42,3 +42,9 @@ pip install .
 * Budget ~30 % of the dataset?
 * % initially labeled: [1%, 3%, 5%, 100% (perfect performance)]?
 * Validation share: [25%, 50%, 75%]?
+
+## Questions
+
+- [ ] What toy dataset(-s) to use?
+- [ ] Omitting __SUPERIOR__?
+- [ ] Online tuning parameters?
