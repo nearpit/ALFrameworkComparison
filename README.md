@@ -40,5 +40,5 @@ pip install .
 
 * 50 tuning trials?
 * Budget ~30 % of the dataset?
-* % initially labeled: [1%, 3%, 5%]?
+* % initially labeled: [1%, 3%, 5%, 100% (perfect performance)]?
 * Validation share: [25%, 50%, 75%]?
