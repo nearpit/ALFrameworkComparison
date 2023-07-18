@@ -21,7 +21,7 @@ class Tuner(BaseClass):
                                               # How many fold it warms up
     pruner_configs = {"n_startup_trials": 5}
     study_configs = {}
-    share_warmup_steps = 0.8
+    share_warmup_steps = 0.6
 
     #CAVEAT check the objective direction   #DEBUG  
     def __init__(self, n_trials, previous_loss=None, direction="minimize", *args, **kwargs):    

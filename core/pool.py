@@ -11,15 +11,15 @@ class Pool:
     split_seed = 42
     n_splits = 10
 
-    def __init__(self, data, torch_seed, val_share, whole_dataset=False, **kwargs):
+    def __init__(self, data, torch_seed, args, **kwargs):
         self.torch_seed = torch_seed
         self.set_seed(self.split_seed)
         self.__dict__.update(**data["train"].configs)
         self.data = data
+        self.args = args
         self.idx_abs = np.arange(len(self.data["train"].x))
-        self.val_share = val_share
-        if whole_dataset:
-            self.n_initial_labeled = self.budget
+        self.val_share = args.val_share
+        self.n_initial_labeled = int(len(self.idx_abs)*args.il_share)
         
         self.set_seed(self.split_seed)
 
@@ -32,7 +32,7 @@ class Pool:
         
         self.set_seed(self.split_seed)
         self.shuffle_splitter = ShuffleSplit(n_splits=self.n_splits, 
-                                             test_size=val_share,
+                                             test_size=args.val_share,
                                              random_state=self.split_seed)
 
 

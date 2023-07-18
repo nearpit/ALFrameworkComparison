@@ -18,7 +18,7 @@ class Visualize:
             "new labeled": "x",
             "unviolated labeled": "^",
             "unlabeled": "2",
-            "next chosen": "o"
+            "added": "o"
         }
     max_dot_size = 150
     fontsize='medium'
@@ -50,20 +50,23 @@ class Visualize:
     def compute_clf_grad(self):
         self.clf_grad = (self.clf(self.clf_inputs)[:, 1]).reshape(self.x1.shape)
 
-    def clf_train(self, ax, train_perf, val_perf):
+    def clf_train(self, ax, train_perf, val_perf, chosen_idx=None):
         ax.contourf(self.x1, self.x2, self.clf_grad, levels=self.contour_levels, alpha=0.3, cmap=plt.cm.coolwarm, antialiased=True)
         x, y = self.pool.get("unlabeled")
         ax.scatter(x[:, 0], x[:, 1], marker='2', c='grey', alpha=0.4, s=self.max_dot_size)
 
         x, y = self.pool.get("unviolated")
         ax.scatter(x[:, 0], x[:, 1], marker=self.markers["unviolated labeled"], c=y.argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)
-
-        x, y = self.pool.get("new_labeled")
-        if len(y) == 1:
-            color = plt.cm.coolwarm(y.argmax(axis=-1)*255)
-        else:
-            color = y.argmax(axis=-1)
-        ax.scatter(x[:, 0], x[:, 1], marker=self.markers["new labeled"], c=color, s=self.max_dot_size, cmap=plt.cm.coolwarm)
+        if chosen_idx:
+            x, y = self.pool.get("new_labeled")
+            chosen_x, chosen_y = x[-1], y[-1]
+            x, y = x[:-1], y[:-1]
+            ax.scatter(chosen_x[0], chosen_x[1], marker=self.markers["added"], linewidths=2, facecolor=plt.cm.coolwarm(chosen_y[1]*255), color="black", s=2*self.max_dot_size)
+            if len(y) == 1:
+                color = plt.cm.coolwarm(y.argmax(axis=-1)*255)
+            else:
+                color = y.argmax(axis=-1)
+            ax.scatter(x[:, 0], x[:, 1], marker=self.markers["new labeled"], c=color, s=self.max_dot_size, cmap=plt.cm.coolwarm)
 
         ax.set_title("Classifier")
         performance_string = f"Train Acc {train_perf[1]['MulticlassAccuracy']:.1%}\nVal Acc {val_perf[1]['MulticlassAccuracy']:.1%}"
@@ -85,17 +88,17 @@ class Visualize:
         ax.annotate(performance_string, xy=(0.03, 0.97), xycoords='axes fraction',
                     ha='left', va='top',
                     bbox=dict(boxstyle='round', fc='w'))          
-
-
         
     def acq_boundary(self, ax, chosen_idx):
         Z = (self.acq.get_scores(self.clf_inputs)).reshape(self.x1.shape)
         ax.contourf(self.x1, self.x2, Z, levels=self.contour_levels, cmap=plt.cm.binary, alpha=0.3, antialiased=True)
+        if chosen_idx:
+            x, y = self.pool.get("new_labeled")
+            chosen_x, chosen_y = x[-1], y[-1]
+            x, y = x[:-1], y[:-1]
+            ax.scatter(chosen_x[0], chosen_x[1], marker=self.markers["added"], linewidths=2, facecolor=plt.cm.coolwarm(chosen_y[1]*255), color="black", s=2*self.max_dot_size)
         x, y = self.pool.get("unlabeled")
-        chosen_x, chosen_y = x[chosen_idx], y[chosen_idx]
-        x, y = np.delete(x, chosen_idx, axis=0), np.delete(y, chosen_idx, axis=0)
-        ax.scatter(x[:, 0], x[:, 1], marker='2', c=y.argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)
-        ax.scatter(chosen_x[0], chosen_x[1], marker=self.markers["next chosen"], linewidths=2, facecolor=plt.cm.coolwarm(chosen_y[1]*255), color="black", s=2*self.max_dot_size)
+        ax.scatter(x[:, 0], x[:, 1], marker=self.markers["unlabeled"], c=y.argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)
         ax.set_title("Acquisition")
        
 
@@ -135,7 +138,7 @@ class Visualize:
         cb_boundary.set_ticklabels(["Class A", "Class B"], fontsize=self.fontsize)
 
 
-    def make_plots(self, chosen_idx, args, iter, train_perf, val_perf, test_perf):
+    def make_plots(self, args, iteration, train_perf, val_perf, test_perf, path_to_store, chosen_idx=None):
         self.test_perf = np.append(self.test_perf, test_perf[0]).astype(float)
         fig, ax = plt.subplots(3, 2, figsize=(20, 20), gridspec_kw={'height_ratios': [1, 20, 20]})
         
@@ -144,18 +147,18 @@ class Visualize:
         self.clf_colorbar(ax[0, 1])
 
         self.acq_boundary(ax[1, 0], chosen_idx)
-        self.clf_train(ax[1, 1], train_perf, val_perf)
+        self.clf_train(ax[1, 1], train_perf, val_perf, chosen_idx)
         self.plot_test_curve(ax[2, 0])
         self.clf_eval(ax[2, 1], test_perf, split="test")
 
-        title = plt.suptitle(f"{str(args.algorithm).capitalize()} Iter:{iter} Random Seed:{args.random_seed}", fontweight="semibold", y=0.925)
+        title = plt.suptitle(f"{str(args.algorithm).capitalize()} Iter:{iteration} Random Seed:{args.random_seed}", fontweight="semibold", y=0.925)
         unviolated_labeled = Line2D([0], [0], label='Unviolated Labeled', marker=self.markers['unviolated labeled'], markersize=self.markersize, color='black', linestyle='')
         new_labeled = Line2D([0], [0], label='New Labeled', marker=self.markers['new labeled'], markersize=self.markersize, color='black', linestyle='')
 
         unlabeled_point = Line2D([0], [0], label='Unlabeled', marker=self.markers['unlabeled'], markersize=self.markersize*1.5, color='black', linestyle='')
         test_points = Line2D([0], [0], label='Test', marker=self.markers['test'], markersize=self.markersize*1.25, color='black', linestyle='')
 
-        chosen_point = Line2D([0], [0], label='Next added', marker=self.markers['next chosen'],  markeredgewidth=2, markersize=self.markersize, markerfacecolor='grey', markeredgecolor='black', linestyle='')
+        chosen_point = Line2D([0], [0], label='Added', marker=self.markers['added'],  markeredgewidth=2, markersize=self.markersize, markerfacecolor='grey', markeredgecolor='black', linestyle='')
         class_0 = mpatches.Patch(color=plt.cm.coolwarm(0), label='Class A')  
         class_1 = mpatches.Patch(color=plt.cm.coolwarm(255), label='Class B')  
 
@@ -168,7 +171,6 @@ class Visualize:
                       fancybox=True, 
                       shadow=True)
 
-        path_to_store = f"results/aux/{args.dataset}/{args.algorithm}/plots/{str(args.random_seed).zfill(4)}/"
-        utilities.funcs.makedir(path_to_store)
-        plt.savefig(path_to_store + str(iter),  bbox_extra_artists=(lgd, title), bbox_inches='tight')
+        utilities.makedir(path_to_store)
+        plt.savefig(path_to_store + str(iteration).zfill(4),  bbox_extra_artists=(lgd, title), bbox_inches='tight')
         plt.close()

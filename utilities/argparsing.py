@@ -1,6 +1,4 @@
-import os
 from argparse import ArgumentParser
-import argparse
 
 
 def get_arguments():
@@ -23,11 +21,12 @@ def get_arguments():
                         default=42)
     
     parser.add_argument("-vs", "--val_share",
-                    help="What share of labeled instances to use for validation",
+                    help="What share of unviolated labeled instances to use for validation",
                     type=float,
-                    default=0.5)
+                    default=0.25)
+    
+    parser.add_argument("-ils", "--il_share",
+                    help="What share of labeled instances to start with",
+                    type=float,
+                    default=0.01)
     return parser.parse_args()
-
-def makedir(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
