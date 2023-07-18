@@ -35,18 +35,10 @@ pip install .
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
 - [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)
-- [ ] Uncertainty Quantification via Autoencoder(AE)
 
-### What is hapenning?
+## Online Tuning
 
-1. Still staying with online tuning (the conventional framework is also implemented and can be switched to any time). They can be seen on gifs. The online tuning seems more legit in the real world scenario since we don't have the access to the whole dataset at the beginning.
-2. All aquisition functions tend to pick predominantly noise in the online framework (without perfect hyper parameters that were found on the whole dataset). I presume that it might be the reason AL is not working in the real world scenario.
-3. Split. When I tried to tune the hypers every iteration, there was a huge disproportion between train/validation splits (e.g. 10 vs 500) what hindered the training process. I presume Repeated K-Fold (2 folds and many repeatitions) is the way to go for finding the best hyper parameters for the current iteration. 2 folds were chosen to alleviate picking noisy instances.
-4. DRUMROLL! All mentioned above still do NOT lead to the working prototype :C (show the last experiment). The learning process seems overregularized.
-
-Regularization:
-L2, early stopping is off for now.
-
-Tuning:
-Ranges were expanded.
-Considering LR scheduler to be added while LR set to 0.5 and set staticly the architecture to the arbitarly sufficient one (or simplify to the depth and width).  
+100 tuning trials
+Budget 30 %
+N initially labeled: [0.5%, 2.5%, 5%, 10%]
+Validation share: [5%, 25%, 50%, 75%, 95%]
