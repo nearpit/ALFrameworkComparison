@@ -48,3 +48,4 @@ pip install .
 - [ ] What toy dataset(-s) to use?
 - [ ] Omitting __SUPERIOR__?
 - [ ] Online tuning parameters?
+- [ ] Comparison to the conventional approach ? 
