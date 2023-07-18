@@ -49,3 +49,4 @@ pip install .
 - [ ] Omitting __SUPERIOR__?
 - [ ] Online tuning parameters?
 - [ ] Comparison to the conventional approach ? 
+- [ ] Seed for split and seed for pytorch ?
