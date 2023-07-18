@@ -168,7 +168,7 @@ class Visualize:
                       fancybox=True, 
                       shadow=True)
 
-        path_to_store = f"results/aux/{args.dataset}/{args.algorithm}/plots/{args.random_seed}/"
+        path_to_store = f"results/aux/{args.dataset}/{args.algorithm}/plots/{str(args.random_seed).zfill(4)}/"
         utilities.funcs.makedir(path_to_store)
         plt.savefig(path_to_store + str(iter),  bbox_extra_artists=(lgd, title), bbox_inches='tight')
         plt.close()

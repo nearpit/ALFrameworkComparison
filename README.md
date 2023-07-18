@@ -32,6 +32,7 @@ pip install .
    8. __metrics_dict__ - metrics of the classifier
 
 ### \#TODO
+- [ ] Add % initially labeled to the run config file 
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
 - [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)
@@ -40,5 +41,5 @@ pip install .
 
 * 100 tuning trials
 * Budget 30 %
-* N initially labeled: [0.5%, 2.5%, 5%, 10%]
+* % initially labeled: [0.5%, 2.5%, 5%, 10%]
 * Validation share: [5%, 25%, 50%, 75%, 95%]

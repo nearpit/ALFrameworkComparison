@@ -9,7 +9,7 @@ class Learnable:
     epochs = 1000
     patience = 20
     n_warmup_epochs = 100
-    avg_val_loss = 0.
+    avg_val_loss = 0
     model = None
     model_class = NN
     model_configs = {"MLP_clf": {"last_activation": "Softmax",
@@ -135,7 +135,10 @@ class Learnable:
                                     n_trials=n_trials,
                                     tunable_hypers=tunable_hypers,
                                     previous_loss=self.avg_val_loss)()
-        self.avg_val_loss = avg_val_loss
+        # Update the avg loss
+        if not self.avg_val_loss or avg_val_loss < self.avg_val_loss:
+            self.avg_val_loss = avg_val_loss
+            
         self.update_model_configs(new_configs)
         return self.train_model()
 
