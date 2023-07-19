@@ -5,7 +5,7 @@
 ![framework difference](https://github.com/Nearpit/ALRM/blob/main/plots/al_flow_diff.png?raw=true)
 
 ## Intermediate results
-
+\* Entropy had 25 trials to find the best parameters while others had 50.
 ![intermediate results](https://github.com/Nearpit/ALRM/blob/main/plots/intermediate_results.png?raw=true)
 
 ## Installation
@@ -39,11 +39,13 @@ pip install .
    7. __budget__ - the amount of AL iterations (0 < x < train_size - n_labeled)
    8. __metrics_dict__ - metrics of the classifier
 
-### \#TODO
+## Questions
 
-- [ ] Keychain naive
-- [ ] Keychain non-heuristics (naive + AE output, etc.)
-- [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)
+- [ ] Online tuning parameters?
+- [ ] What toy dataset(-s) to use?
+- [ ] Comparison of static hypers and online tuning?
+- [ ] Seed for split and seed for pytorch?
+- [ ] Omitting __SUPERIOR__?
 
 ## Online Tuning
 
@@ -52,11 +54,9 @@ pip install .
 - % initially labeled: [1%, 3%, 5%, 100% (perfect performance)]?
 - Validation share: [25%, 50%, 75%]?
 
-## Questions
+### \#TODO
 
-- [ ] What toy dataset(-s) to use?
-- [ ] Online tuning parameters?
-- [ ] Comparison of static hypers and online tuning?
-- [ ] Seed for split and seed for pytorch?
-- [ ] Omitting __SUPERIOR__?
-- [ ] How to do cheating?
+- [ ] Rewrite cheating with tuning
+- [ ] Adjust Keychain naive
+- [ ] Code keychain non-heuristics (naive + AE output, etc.)
+- [ ] Code Keychain __SUPERIOR__ (Heuristics + non-heuristics)
