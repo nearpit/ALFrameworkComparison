@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.datasets import make_blobs, make_circles, make_moons
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 
 from datasets.base import VectoralDataset
@@ -26,7 +25,6 @@ class Toy(VectoralDataset):
     def obtain(self):
         x, y = self.generate_clean()
         x_hp, _ = self.generate_noise()
-        # x_hp = self.make_circle(n_samples=self.configs["n_honeypot"], scale_factor=2.5, along_x=0.5, noise=0.15)
         y_hp = np.tile(np.array([0, 1]), int(self.configs["n_honeypot"]/2))
         x = np.concatenate((x, x_hp)).astype(np.float32)
         y = np.concatenate((y, y_hp)).reshape(-1, 1).astype(np.float32)
@@ -50,38 +48,3 @@ class Toy(VectoralDataset):
         if noise is not None:
             x += generator.normal(scale=noise, size=x.shape)
         return x
-
-class Blobs(Toy):
-    dataset_name = "blobs"
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def generate_noise(self):
-        return make_blobs(n_samples=self.configs["n_honeypot"], 
-                          centers=[(0, 1.5)],
-                          cluster_std=[0.3],
-                          random_state=self.random_seed)
-
-    
-    def generate_clean(self):
-        return make_blobs(n_samples=self.configs["n_instances"] - self.configs["n_honeypot"],
-                          centers=[(0, 0), (1, 2)], 
-                          cluster_std=[0.2, 0.2], 
-                          random_state=self.random_seed)
-    
-class Moons(Toy):
-    dataset_name = "moons"
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def generate_noise(self):
-        return self.make_circle(n_samples=self.configs["n_honeypot"], scale_factor=2.5, noise=0.1), None
-
-    
-    def generate_clean(self):
-        return make_moons(n_samples=self.configs["n_instances"] - self.configs["n_honeypot"],
-                          noise=0.05,
-                          random_state=self.random_seed)
-        

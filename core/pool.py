@@ -8,32 +8,31 @@ import datasets
 
 
 class Pool:
-    split_seed = 42
     n_splits = 10
 
     def __init__(self, data, torch_seed, args, **kwargs):
         self.torch_seed = torch_seed
-        self.set_seed(self.split_seed)
+        self.set_seed(self.torch_seed)
         self.__dict__.update(**data["train"].configs)
         self.data = data
         self.args = args
         self.idx_abs = np.arange(len(self.data["train"].x))
         self.val_share = args.val_share
-        self.n_initial_labeled = int(len(self.idx_abs)*args.il_share)
+        self.n_initially_labeled = args.n_initially_labeled
         
-        self.set_seed(self.split_seed)
+        self.set_seed(self.torch_seed)
 
-        self.idx_unviolated_lb = np.random.choice(self.idx_abs, size=self.n_initial_labeled, replace=False)
+        self.idx_unviolated_lb = np.random.choice(self.idx_abs, size=self.n_initially_labeled, replace=False)
         self.idx_new_lb = np.array([], dtype=int)
 
-        self.set_seed(self.split_seed)
+        self.set_seed(self.torch_seed)
         self.test_loader = DataLoader(data["test"], batch_size=self.batch_size, shuffle=False)
 
         
-        self.set_seed(self.split_seed)
+        self.set_seed(self.torch_seed)
         self.shuffle_splitter = ShuffleSplit(n_splits=self.n_splits, 
                                              test_size=args.val_share,
-                                             random_state=self.split_seed)
+                                             random_state=self.torch_seed)
 
 
     def __getitem__(self, idx):
@@ -52,8 +51,9 @@ class Pool:
         return Subset(self.data['train'], self.idx_unviolated_lb)
        
     @property
-    def unviolated_splitter(self):
-        self.set_seed(seed=self.split_seed)
+    def unviolated_splitter(self, tune=True):
+        if tune:
+            self.set_seed(seed=self.torch_seed)
         return self.shuffle_splitter.split(self.unviolated_lb_dataset)
 
     @property
@@ -69,7 +69,7 @@ class Pool:
         unviolated_train_ds = Subset(self.unviolated_lb_dataset, unviolated_train_idx)
         unviolated_val_ds = Subset(self.unviolated_lb_dataset, unviolated_val_idx)
 
-        self.set_seed(seed=self.split_seed)
+        self.set_seed(seed=self.torch_seed)
         train_loader = DataLoader(ConcatDataset((unviolated_train_ds, self.new_lb_dataset)),
                                   batch_size=self.batch_size, 
                                   drop_last=self.drop_last,

@@ -39,22 +39,19 @@ pip install .
    7. __budget__ - the amount of AL iterations (0 < x < train_size - n_labeled)
    8. __metrics_dict__ - metrics of the classifier
 
-## Questions
-
-- [ ] Online tuning parameters?
-- [ ] What toy dataset(-s) to use? Moon, Poisoned Moons, Blobs, Diverging Sin
-- [ ] Comparison of static hypers and online tuning?
-- [ ] Seed for split and seed for pytorch? PYTORCH EVERYWHERE 
-
 ## Online Tuning
 
-- 50 tuning trials
-- Budget ~40 % of the dataset (train, without test)
-- n initially labeled: [2, 20, 100, all (perfect performance)]
-- Validation share: [10%, 50%, 90%]?
+- [X] 50 tuning trials
+- [X] Budget ~40 % of the train split
+- [X] n initially labeled: [20, 60, 100, all (perfect performance)]
+- [X] Validation share: [10%, 50%, 90%]
 
 ### \#TODO
 
+- [X] Pytorch seed for splitting as well
+- [X] What toy dataset(-s) to use? Moons, Adversarial Moons, Blobs
+- [ ] Comparison of static hypers and online tuning?
+- [ ] Diverging Sin Dataset
 - [ ] Adjust Keychain naive
 - [ ] AUC
 - [ ] Code keychain non-heuristics (naive + AE output, etc.)

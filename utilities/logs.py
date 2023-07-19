@@ -17,7 +17,7 @@ def gather_results(args, idx_added, test_perf, val_perf, train_perf, pool, idx):
                 pool.get_len("unlabeled"), 
                 pool.get_len("all_labeled"), 
                 args.val_share,
-                args.il_share,
+                args.n_initially_labeled,
                 idx]
     
 def get_name(args, include_alg=True):

@@ -143,7 +143,7 @@ class Learnable:
         return self.train_model()
 
     def train_model(self):
-        unviolated_train_idx, unviolated_val_idx = next(self.pool.unviolated_splitter)
+        unviolated_train_idx, unviolated_val_idx = next(self.pool.unviolated_splitter, tune=False)
         train_loader, val_loader = self.pool.get_train_val_loaders(unviolated_train_idx, unviolated_val_idx)
         train_perf, val_perf = self.fit(train_loader=train_loader, val_loader=val_loader)
         test_perf = self.eval(loader=self.pool.test_loader)

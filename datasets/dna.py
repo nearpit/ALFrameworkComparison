@@ -17,6 +17,8 @@ class Dna(SVMDataset):
         super().__init__(*args, **kwargs)
     
     def split(self, data):
-        data["train"] = np.concatenate((data["train"], data["val"].copy()))
+        data["train"]["x"] = np.concatenate((data["train"]["x"], data["val"]["x"].copy()))
+        data["train"]["y"] = np.concatenate((data["train"]["y"], data["val"]["y"].copy()))
+
         data.pop("val", None)
         return data

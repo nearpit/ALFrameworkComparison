@@ -14,7 +14,7 @@ class ActiveLearning:
         self.pool = core.Pool(data=Dataclass.get_data_dict(), torch_seed=self.random_seed, args=args)
 
         self.hyper_path = f"temp/hypers/{args.dataset}/"
-        self.hyper_filename = f"{str(args.random_seed)}_{args.val_share}_{args.il_share}.pkl"
+        self.hyper_filename = f"{str(args.random_seed)}_{args.val_share}_{args.n_initially_labeled}.pkl"
         self.best_hypers = utilities.retrieve_pkl(self.hyper_path + self.hyper_filename)
         self.clf = core.Learnable(pool=self.pool, 
                                   model_configs=self.best_hypers,
@@ -23,7 +23,7 @@ class ActiveLearning:
         if Dataclass.visualize:
             self.visualizer = utilities.Visualize(self.pool, self.clf, self.acq, total_budget=self.budget)
 
-        self.results_path = f"results/{args.dataset}/{args.algorithm}/il_share_{args.il_share}/val_share_{args.val_share}/"
+        self.results_path = f"results/{args.dataset}/{args.algorithm}/il_{args.n_initially_labeled}/val_share_{args.val_share}/"
        
     def run(self):
         results = [["dataset", 
@@ -39,7 +39,7 @@ class ActiveLearning:
                    "len_ulb", 
                    "len_lb", 
                    "val_share",
-                   "il_share",
+                   "n_initially_labeled",
                    "iteration"]]
         abs_idx = None
         if self.best_hypers: # If the hypers were tuned beforehand
@@ -70,7 +70,8 @@ class ActiveLearning:
 
                 if hasattr(self, "visualizer") and self.acq.__class__.__name__ != "Cheating":
                     self.visualizer.make_plots(self.args, iteration, train_perf, val_perf, test_perf, self.results_path + "plots/", relative_idx)
-        elif self.args.il_share == 1.:        
+        # if we train on the whole dataset
+        elif self.args.n_initially_labeled == self.pool.get_len("total"):        
             results.append(utilities.gather_results(self.args, abs_idx, test_perf, val_perf, train_perf, self.pool, 0))
             utilities.store_csv(results, filename=str(self.args.random_seed).zfill(2), path=self.results_path)
         else:

@@ -25,8 +25,8 @@ def get_arguments():
                     type=float,
                     default=0.25)
     
-    parser.add_argument("-ils", "--il_share",
-                    help="What share of labeled instances to start with",
-                    type=float,
-                    default=0.01)
+    parser.add_argument("-n_il", "--n_initially_labeled",
+                    help="What number of labeled instances to start with",
+                    type=int,
+                    default=20)
     return parser.parse_args()

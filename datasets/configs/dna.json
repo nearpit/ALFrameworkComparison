@@ -1,10 +1,9 @@
 {
     "n_features": 180,
     "n_instances": 3186, 
-    "n_initial_labeled": 10, 
     "n_classes": 3,
     "batch_size": 32,
-    "budget": 600,
+    "budget": 800,
     "metrics_dict": {
         "MulticlassAccuracy": {
             "num_classes": 3
