@@ -51,8 +51,9 @@ class ActiveLearning:
 
         logging.warning(f'{abs_idx} {self.pool.get_len("all_labeled")} {self.pool.get_len("unlabeled")} {utilities.get_name(args=self.args)}\n{train_perf}\n{val_perf}\n{test_perf}')
 
-        if hasattr(self, "visualizer") and self.acq.__class__.__name__ != "Cheating":
-            self.visualizer.make_plots(self.args, 0, train_perf, val_perf, test_perf, self.results_path + "plots/")
+        if hasattr(self, "visualizer"):
+            draw_acq = self.acq.__class__.__name__ != "Cheating"
+            self.visualizer.make_plots(self.args, 0, train_perf, val_perf, test_perf, self.results_path + "plots/", draw_acq=draw_acq)
         if self.budget <  self.pool.get_len("unlabeled"):
             for iteration in range(1, self.budget + 1):
 

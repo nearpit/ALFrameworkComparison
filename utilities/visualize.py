@@ -89,9 +89,10 @@ class Visualize:
                     ha='left', va='top',
                     bbox=dict(boxstyle='round', fc='w'))          
         
-    def acq_boundary(self, ax, chosen_idx):
-        Z = (self.acq.get_scores(self.clf_inputs)).reshape(self.x1.shape)
-        ax.contourf(self.x1, self.x2, Z, levels=self.contour_levels, cmap=plt.cm.binary, alpha=0.3, antialiased=True)
+    def acq_boundary(self, ax, chosen_idx, draw_acq):
+        if draw_acq:
+            Z = (self.acq.get_scores(self.clf_inputs)).reshape(self.x1.shape)
+            ax.contourf(self.x1, self.x2, Z, levels=self.contour_levels, cmap=plt.cm.binary, alpha=0.3, antialiased=True)
         if chosen_idx:
             x, y = self.pool.get("new_labeled")
             chosen_x, chosen_y = x[-1], y[-1]
@@ -138,7 +139,7 @@ class Visualize:
         cb_boundary.set_ticklabels(["Class A", "Class B"], fontsize=self.fontsize)
 
 
-    def make_plots(self, args, iteration, train_perf, val_perf, test_perf, path_to_store, chosen_idx=None):
+    def make_plots(self, args, iteration, train_perf, val_perf, test_perf, path_to_store, chosen_idx=None, draw_acq=True):
         self.test_perf = np.append(self.test_perf, test_perf[0]).astype(float)
         fig, ax = plt.subplots(3, 2, figsize=(20, 20), gridspec_kw={'height_ratios': [1, 20, 20]})
         
@@ -146,7 +147,7 @@ class Visualize:
         self.acq_colorbar(ax[0, 0])
         self.clf_colorbar(ax[0, 1])
 
-        self.acq_boundary(ax[1, 0], chosen_idx)
+        self.acq_boundary(ax[1, 0], chosen_idx, draw_acq)
         self.clf_train(ax[1, 1], train_perf, val_perf, chosen_idx)
         self.plot_test_curve(ax[2, 0])
         self.clf_eval(ax[2, 1], test_perf, split="test")

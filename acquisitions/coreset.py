@@ -14,7 +14,7 @@ class Coreset(Acquisition):
         if values is None:
             values = self.pool.get("unlabeled")[0]
 
-        latent_ulb, latent_lb = self.get_embeddings(values), self.get_embeddings(self.pool.get("labeled")[0])
+        latent_ulb, latent_lb = self.get_embeddings(values), self.get_embeddings(self.pool.get("all_labeled")[0])
         pair_distance = pairwise_distances(latent_ulb.cpu(), latent_lb.cpu())
         min_dist = np.amin(pair_distance, axis=1)
 
