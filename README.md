@@ -39,14 +39,6 @@ pip install .
    7. __budget__ - the amount of AL iterations (0 < x < train_size - n_labeled)
    8. __metrics_dict__ - metrics of the classifier
 
-
-## Online Tuning
-
-- 50 tuning trials?
-- Budget ~30 % of the dataset?
-- % initially labeled: [1%, 3%, 5%, 100% (perfect performance)]?
-- Validation share: [25%, 50%, 75%]?
-
 ## Questions
 
 - [ ] Online tuning parameters?
@@ -54,6 +46,13 @@ pip install .
 - [ ] Comparison of static hypers and online tuning?
 - [ ] Seed for split and seed for pytorch?
 - [ ] Omitting __SUPERIOR__?
+
+## Online Tuning
+
+- 50 tuning trials?
+- Budget ~30 % of the dataset?
+- % initially labeled: [1%, 3%, 5%, 100% (perfect performance)]?
+- Validation share: [25%, 50%, 75%]?
 
 ### \#TODO
 
