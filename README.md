@@ -41,6 +41,7 @@ pip install .
 
 ### \#TODO
 
+- [ ] Rewrite cheating with tuning
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
 - [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)
@@ -59,4 +60,3 @@ pip install .
 - [ ] Comparison of static hypers and online tuning?
 - [ ] Seed for split and seed for pytorch?
 - [ ] Omitting __SUPERIOR__?
-- [ ] How to do cheating?
