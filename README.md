@@ -1,6 +1,10 @@
 # Active Learning via Reconstruction Models (ALRM)
 
+## New Framework
+
 ![framework difference](https://github.com/Nearpit/ALRM/blob/main/plots/al_flow.png?raw=true)
+
+## Intermediate results
 
 ![intermediate results](https://github.com/Nearpit/ALRM/blob/main/plots/intermediate_results.png?raw=true)
 
