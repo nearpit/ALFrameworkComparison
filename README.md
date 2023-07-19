@@ -32,21 +32,22 @@ pip install .
    8. __metrics_dict__ - metrics of the classifier
 
 ### \#TODO
+
 - [ ] Keychain naive
 - [ ] Keychain non-heuristics (naive + AE output, etc.)
 - [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)
 
 ## Online Tuning
 
-* 50 tuning trials?
-* Budget ~30 % of the dataset?
-* % initially labeled: [1%, 3%, 5%, 100% (perfect performance)]?
-* Validation share: [25%, 50%, 75%]?
+- 50 tuning trials?
+- Budget ~30 % of the dataset?
+- % initially labeled: [1%, 3%, 5%, 100% (perfect performance)]?
+- Validation share: [25%, 50%, 75%]?
 
 ## Questions
 
 - [ ] What toy dataset(-s) to use?
-- [ ] Omitting __SUPERIOR__?
 - [ ] Online tuning parameters?
-- [ ] Comparison to the conventional approach ? 
-- [ ] Seed for split and seed for pytorch ?
+- [ ] Comparison of static hypers and online tuning?
+- [ ] Seed for split and seed for pytorch?
+- [ ] Omitting __SUPERIOR__?
