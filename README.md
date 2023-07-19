@@ -39,12 +39,6 @@ pip install .
    7. __budget__ - the amount of AL iterations (0 < x < train_size - n_labeled)
    8. __metrics_dict__ - metrics of the classifier
 
-### \#TODO
-
-- [ ] Rewrite cheating with tuning
-- [ ] Adjust Keychain naive
-- [ ] Code keychain non-heuristics (naive + AE output, etc.)
-- [ ] Code Keychain __SUPERIOR__ (Heuristics + non-heuristics)
 
 ## Online Tuning
 
@@ -55,8 +49,15 @@ pip install .
 
 ## Questions
 
-- [ ] What toy dataset(-s) to use?
 - [ ] Online tuning parameters?
+- [ ] What toy dataset(-s) to use?
 - [ ] Comparison of static hypers and online tuning?
 - [ ] Seed for split and seed for pytorch?
 - [ ] Omitting __SUPERIOR__?
+
+### \#TODO
+
+- [ ] Rewrite cheating with tuning
+- [ ] Adjust Keychain naive
+- [ ] Code keychain non-heuristics (naive + AE output, etc.)
+- [ ] Code Keychain __SUPERIOR__ (Heuristics + non-heuristics)
