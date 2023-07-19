@@ -14,7 +14,7 @@ class ActiveLearning:
         self.pool = core.Pool(data=Dataclass.get_data_dict(), torch_seed=self.random_seed, args=args)
 
         self.hyper_path = f"temp/hypers/{args.dataset}/"
-        self.hyper_filename = f"{str(args.random_seed)}_{args.val_share}_{args.n_initially_labeled}.pkl"
+        self.hyper_filename = f"{str(args.random_seed)}_{args.val_share}_{args.n_initially_labeled}_{args.online_tuning}.pkl"
         self.best_hypers = utilities.retrieve_pkl(self.hyper_path + self.hyper_filename)
         self.clf = core.Learnable(pool=self.pool, 
                                   model_configs=self.best_hypers,
@@ -23,7 +23,7 @@ class ActiveLearning:
         if Dataclass.visualize:
             self.visualizer = utilities.Visualize(self.pool, self.clf, self.acq, total_budget=self.budget)
 
-        self.results_path = f"results/{args.dataset}/{args.algorithm}/il_{args.n_initially_labeled}/val_share_{args.val_share}/"
+        self.results_path = f"results/{args.dataset}/{args.algorithm}/il_{args.n_initially_labeled}/val_share_{args.val_share}/online_{args.online_tuning}/"
        
     def run(self):
         results = [["dataset", 
@@ -39,10 +39,11 @@ class ActiveLearning:
                    "len_ulb", 
                    "len_lb", 
                    "val_share",
+                   "online_tuning",
                    "n_initially_labeled",
                    "iteration"]]
         abs_idx = None
-        if self.best_hypers: # If the hypers were tuned beforehand
+        if self.best_hypers: # If the hypers were tuned beforehand by other algorithm workload
             train_perf, val_perf, test_perf = self.clf.train_model()
         else: # if there are no hypers found
             train_perf, val_perf, test_perf = self.clf.tune_model(n_trials=self.n_trials)

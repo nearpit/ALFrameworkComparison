@@ -1,4 +1,4 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, BooleanOptionalAction
 
 
 def get_arguments():
@@ -29,4 +29,10 @@ def get_arguments():
                     help="What number of labeled instances to start with",
                     type=int,
                     default=20)
+    
+    parser.add_argument("-ot", "--online_tuning",
+                    help="Whether to tune online or only once at the beginning on the whole dataset",
+                    default=True, 
+                    action=BooleanOptionalAction)
+    
     return parser.parse_args()
