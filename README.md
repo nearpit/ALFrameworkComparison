@@ -42,21 +42,19 @@ pip install .
 ## Questions
 
 - [ ] Online tuning parameters?
-- [ ] What toy dataset(-s) to use?
+- [ ] What toy dataset(-s) to use? Moon, Poisoned Moons, Blobs, Diverging Sin
 - [ ] Comparison of static hypers and online tuning?
-- [ ] Seed for split and seed for pytorch?
-- [ ] Omitting __SUPERIOR__?
+- [ ] Seed for split and seed for pytorch? PYTORCH EVERYWHERE 
 
 ## Online Tuning
 
-- 50 tuning trials?
-- Budget ~30 % of the dataset?
-- % initially labeled: [1%, 3%, 5%, 100% (perfect performance)]?
-- Validation share: [25%, 50%, 75%]?
+- 50 tuning trials
+- Budget ~40 % of the dataset (train, without test)
+- n initially labeled: [2, 20, 100, all (perfect performance)]
+- Validation share: [10%, 50%, 90%]?
 
 ### \#TODO
 
-- [ ] Rewrite cheating with tuning
 - [ ] Adjust Keychain naive
+- [ ] AUC
 - [ ] Code keychain non-heuristics (naive + AE output, etc.)
-- [ ] Code Keychain __SUPERIOR__ (Heuristics + non-heuristics)
