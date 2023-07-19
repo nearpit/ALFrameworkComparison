@@ -1,5 +1,7 @@
 # Active Learning via Reconstruction Models (ALRM)
-![intermediate results](https://github.com/Nearpit/ALRM/blob/main/plots/iintermediate_results.png?raw=true) 
+
+![intermediate results](https://github.com/Nearpit/ALRM/blob/main/plots/intermediate_results.png?raw=true)
+
 ## Installation
 
 ```
