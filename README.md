@@ -2,7 +2,6 @@
 
 ## New Framework
 
-![framework difference](https://github.com/Nearpit/ALRM/blob/main/plots/al_flow.png?raw=true)
 
 ## Intermediate results
 
