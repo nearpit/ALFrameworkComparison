@@ -42,9 +42,9 @@ pip install .
 ### \#TODO
 
 - [ ] Rewrite cheating with tuning
-- [ ] Keychain naive
-- [ ] Keychain non-heuristics (naive + AE output, etc.)
-- [ ] Keychain __SUPERIOR__ (Heuristics + non-heuristics)
+- [ ] Adjust Keychain naive
+- [ ] Code keychain non-heuristics (naive + AE output, etc.)
+- [ ] Code Keychain __SUPERIOR__ (Heuristics + non-heuristics)
 
 ## Online Tuning
 
