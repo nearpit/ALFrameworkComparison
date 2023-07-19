@@ -5,7 +5,7 @@
 ![framework difference](https://github.com/Nearpit/ALRM/blob/main/plots/flow_diff.png?raw=true)
 
 ## Intermediate results
-
+\* Entropy had 25 trials to find the best parameters while others had 50.
 ![intermediate results](https://github.com/Nearpit/ALRM/blob/main/plots/intermediate_results.png?raw=true)
 
 ## Installation
