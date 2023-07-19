@@ -1,5 +1,7 @@
 # Active Learning via Reconstruction Models (ALRM)
 
+![framework difference](https://github.com/Nearpit/ALRM/blob/main/plots/al_flow.png?raw=true)
+
 ![intermediate results](https://github.com/Nearpit/ALRM/blob/main/plots/intermediate_results.png?raw=true)
 
 ## Installation
