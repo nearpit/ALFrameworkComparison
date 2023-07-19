@@ -11,7 +11,7 @@ class Blobs(Toy):
     def generate_noise(self):
         return make_blobs(n_samples=self.configs["n_honeypot"], 
                           centers=[(1, 1)],
-                          cluster_std=[self.std],
+                          cluster_std=[1.5*self.std],
                           random_state=self.random_seed)
 
     
