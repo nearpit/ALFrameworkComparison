@@ -4,11 +4,9 @@ import torch
 from torch.utils.data import DataLoader, Subset, ConcatDataset
 from sklearn.model_selection import ShuffleSplit
 
-import datasets
-
-
 class Pool:
     n_splits = 10
+    const_seed = 2**32 - 1
 
     def __init__(self, data, torch_seed, args, **kwargs):
         self.torch_seed = torch_seed
@@ -34,7 +32,6 @@ class Pool:
                                              test_size=args.val_share,
                                              random_state=self.torch_seed)
 
-
     def __getitem__(self, idx):
         return self.data["train"][idx]  
 
@@ -49,21 +46,31 @@ class Pool:
     @property
     def unviolated_lb_dataset(self):
         return Subset(self.data['train'], self.idx_unviolated_lb)
-       
-    @property
-    def unviolated_splitter(self, tune=True):
-        if tune:
-            self.set_seed(seed=self.torch_seed)
-        return self.shuffle_splitter.split(self.unviolated_lb_dataset)
 
     @property
     def drop_last(self):
         # drop last if the number of labeled instances is bigger than the batch_size
-        return int(self.get_len("unviolated")*self.val_share) + self.get_len("new_labeled") > self.batch_size 
+        return int(self.get_len("unviolated")*(1-self.val_share)) + self.get_len("new_labeled") > self.batch_size 
 
     @property
     def idx_ulb(self):
         return np.delete(self.idx_abs, self.idx_all_labeled) 
+    
+    def get_unviolated_splitter(self, tune=True):
+        if tune:
+            self.set_seed(seed=self.torch_seed)
+        else:
+            self.set_seed(self.const_seed)
+        return self.shuffle_splitter.split(self.unviolated_lb_dataset)
+    
+    def fill_up(self):
+        self.idx_unviolated_lb = np.random.choice(self.idx_abs, size=len(self.idx_abs), replace=False)
+
+    def update_splitter(self, val_share):
+        self.shuffle_splitter = ShuffleSplit(n_splits=self.n_splits, 
+                                             test_size=val_share,
+                                             random_state=self.torch_seed)
+
 
     def get_train_val_loaders(self, unviolated_train_idx, unviolated_val_idx):
         unviolated_train_ds = Subset(self.unviolated_lb_dataset, unviolated_train_idx)
@@ -81,11 +88,10 @@ class Pool:
     def get_len(self, pool="total"):
         return len(self.get(pool)[0])
     
-        
     def add_new_inst(self, idx):
         assert len(self.idx_ulb)
         self.idx_new_lb = np.append(self.idx_new_lb, idx)
-    
+
     def get(self, pool):
         if pool == "all_labeled":
             return self[self.idx_all_labeled]

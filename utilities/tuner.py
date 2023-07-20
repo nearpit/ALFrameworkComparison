@@ -88,7 +88,7 @@ class Objective(BaseClass):
         suggest_dict = self.suggest_params(trial)
         self.clf.update_model_configs(suggest_dict)
         val_loss = utilities.OnlineAvg()
-        for fold_num, (train_idx, val_idx) in enumerate(self.pool.unviolated_splitter):
+        for fold_num, (train_idx, val_idx) in enumerate(self.pool.get_unviolated_splitter(tune=True)):
             train_loader, val_loader = self.pool.get_train_val_loaders(train_idx, val_idx)
             train_perf, val_perf = self.clf.fit(train_loader=train_loader, val_loader=val_loader)
             val_loss += float(val_perf[0])

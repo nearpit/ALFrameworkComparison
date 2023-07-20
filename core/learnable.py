@@ -1,5 +1,5 @@
+import copy
 import torch
-from torch.utils.data import Subset, ConcatDataset, DataLoader
 
 from utilities import NN, EarlyStopper, Tuner, OnlineAvg
 
@@ -127,10 +127,14 @@ class Learnable:
                 if hasattr(layer, 'reset_parameters'):
                     layer.reset_parameters()
 
-    def tune_model(self, n_trials, tunable_hypers=None):
+    def tune_model(self, n_trials, online, tunable_hypers=None):
         if tunable_hypers is None:
             tunable_hypers = Tuner.all_hypers.copy()
-        new_configs, avg_val_loss = Tuner(pool=self.pool,
+        pool = copy.copy(self.pool)
+        if not online:
+            pool.fill_up()
+            pool.update_splitter(val_share=0.2)
+        new_configs, avg_val_loss = Tuner(pool=pool,
                                     clf=self,
                                     n_trials=n_trials,
                                     tunable_hypers=tunable_hypers,
@@ -143,7 +147,7 @@ class Learnable:
         return self.train_model()
 
     def train_model(self):
-        unviolated_train_idx, unviolated_val_idx = next(self.pool.unviolated_splitter, tune=False)
+        unviolated_train_idx, unviolated_val_idx = next(self.pool.get_unviolated_splitter(tune=False))
         train_loader, val_loader = self.pool.get_train_val_loaders(unviolated_train_idx, unviolated_val_idx)
         train_perf, val_perf = self.fit(train_loader=train_loader, val_loader=val_loader)
         test_perf = self.eval(loader=self.pool.test_loader)

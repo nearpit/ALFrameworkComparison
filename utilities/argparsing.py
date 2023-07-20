@@ -1,6 +1,5 @@
 from argparse import ArgumentParser, BooleanOptionalAction
-
-
+    
 def get_arguments():
     parser = ArgumentParser()
     parser.add_argument("-d", "--dataset",
@@ -9,7 +8,6 @@ def get_arguments():
     parser.add_argument("-a", "--algorithm",
                         help="What active learning algorithm to evaluate",  
                         choices=["random",
-                                 "cheating",
                                  "keychain",
                                  "bald", 
                                  "coreset",
@@ -30,8 +28,8 @@ def get_arguments():
                     type=int,
                     default=20)
     
-    parser.add_argument("-ot", "--online_tuning",
-                    help="Whether to tune online or only once at the beginning on the whole dataset",
+    parser.add_argument("-o", "--online",
+                    help="Are the hyperparameters searched online or they stay static? Options: --online or --no-online",
                     default=True, 
                     action=BooleanOptionalAction)
     

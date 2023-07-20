@@ -1,7 +1,7 @@
 {
     "n_features": 2,
-    "n_instances": 700, 
-    "n_honeypot": 100, 
+    "n_instances": 500, 
+    "n_honeypot": 0, 
     "n_classes": 2,
     "batch_size": 32,
     "budget": 160,

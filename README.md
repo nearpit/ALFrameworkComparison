@@ -27,9 +27,8 @@ pip install .
 ### To add a new dataset
 
 1. Add a new class to the _dataset_ folder inhereting some of the _base_ classes.
-2. Add the relative name for the `--d` argument.
-3. Import the added class to the _\_\_init\_\_.py_ file in the _acquisition_ folder.
-4. Initialize json file in the _dataset/configs_ folder (see example.json)
+2. Import the added class to the _\_\_init\_\_.py_ file in the _acquisition_ folder.
+3. Initialize json file in the _dataset/configs_ folder (see example.json)
    1. __n_features__ - the number of features of the added dataset
    2. __n_instances__ - the number of instances of the added dataset
    3. __n_labeled__ - the number of labeled instances at the begging of the AL process
@@ -38,6 +37,11 @@ pip install .
    6. __batch_size__ (x < n_labeled)
    7. __budget__ - the amount of AL iterations (0 < x < train_size - n_labeled)
    8. __metrics_dict__ - metrics of the classifier
+
+## Findings
+
+- Conventionally used static hyperparameters lead to irrelevant classfier. There is a clear tendecy of drastically deteriorating the classifier once in a while.
+- Due to the previous point, BALD suffered the most - its acquisition function looks like noise most of the time.
 
 ## Online Tuning
 
@@ -50,8 +54,8 @@ pip install .
 
 - [X] Pytorch seed for splitting as well
 - [X] What toy dataset(-s) to use? Moons, Adversarial Moons, Blobs
-- [ ] Comparison of static hypers and online tuning?
-- [ ] Diverging Sin Dataset
+- [X] Comparison of static hypers and online tuning?
+- [X] Diverging Sin Dataset
 - [ ] Adjust Keychain naive
 - [ ] AUC
 - [ ] Code keychain non-heuristics (naive + AE output, etc.)

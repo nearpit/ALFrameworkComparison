@@ -12,6 +12,7 @@ class VectoralDataset(Dataset):
     feature_encoder = None
     target_encoder = None
     configs = None
+    random_seed = 42
 
     # Loading configs for every non-base dataset class
     def __init_subclass__(cls, **kwargs):
@@ -21,11 +22,8 @@ class VectoralDataset(Dataset):
         super().__init_subclass__(**kwargs)
 
 
-    def __init__(self, split_name, random_seed=42):
+    def __init__(self, split_name):
         super().__init__()
-
-        self.random_seed = random_seed
-
 
         self.location = "datasets/data/" + self.dataset_name
 

@@ -9,9 +9,11 @@ class Toy(VectoralDataset):
     feature_encoder = MinMaxScaler()
     target_encoder = OneHotEncoder(sparse_output=False)
 
-    def __init__(self,
-                 *args, **kwargs):
+
+    def __init__(self, *args, **kwargs):
+        self.generator = np.random.RandomState(self.random_seed)
         super().__init__(*args, **kwargs)
+
 
 
 
@@ -43,8 +45,7 @@ class Toy(VectoralDataset):
         linspace_out = np.linspace(0, 2 * np.pi, n_samples, endpoint=False)
         outer_circ_x = along_x + scale_factor*np.cos(linspace_out)
         outer_circ_y = along_y + scale_factor*np.sin(linspace_out)
-        generator = np.random.RandomState(self.random_seed)
         x = np.column_stack([outer_circ_x, outer_circ_y])
         if noise is not None:
-            x += generator.normal(scale=noise, size=x.shape)
+            x += self.generator.normal(scale=noise, size=x.shape)
         return x
