@@ -8,29 +8,36 @@ class Pool:
     n_splits = 10
     const_seed = 2**32 - 1
 
-    def __init__(self, data, torch_seed, args, **kwargs):
-        self.torch_seed = torch_seed
-        self.set_seed(self.torch_seed)
+    def __init__(self, data, args, val_share=None, n_initially_labeled=None, **kwargs):
+        self.random_seed = args.random_seed
+        self.set_seed(self.random_seed)
         self.__dict__.update(**data["train"].configs)
         self.data = data
         self.args = args
         self.idx_abs = np.arange(len(self.data["train"].x))
-        self.val_share = args.val_share
-        self.n_initially_labeled = args.n_initially_labeled
+
+        if val_share is None:
+            val_share = args.val_share
+        self.val_share = val_share
+
+        if n_initially_labeled is None:
+            n_initially_labeled = args.n_initially_labeled
+        self.n_initially_labeled = n_initially_labeled
         
-        self.set_seed(self.torch_seed)
+        self.set_seed(self.random_seed)
 
         self.idx_unviolated_lb = np.random.choice(self.idx_abs, size=self.n_initially_labeled, replace=False)
         self.idx_new_lb = np.array([], dtype=int)
 
-        self.set_seed(self.torch_seed)
-        self.test_loader = DataLoader(data["test"], batch_size=self.batch_size, shuffle=False)
+        self.set_seed(self.random_seed)
+        if "test" in data:
+            self.test_loader = DataLoader(data["test"], batch_size=self.batch_size, shuffle=False)
 
         
-        self.set_seed(self.torch_seed)
+        self.set_seed(self.random_seed)
         self.shuffle_splitter = ShuffleSplit(n_splits=self.n_splits, 
                                              test_size=args.val_share,
-                                             random_state=self.torch_seed)
+                                             random_state=self.random_seed)
 
     def __getitem__(self, idx):
         return self.data["train"][idx]  
@@ -46,7 +53,11 @@ class Pool:
     @property
     def unviolated_lb_dataset(self):
         return Subset(self.data['train'], self.idx_unviolated_lb)
-
+    
+    @property
+    def all_lb_dataset(self):
+        return Subset(self.data['train'], self.idx_all_labeled)
+    
     @property
     def drop_last(self):
         # drop last if the number of labeled instances is bigger than the batch_size
@@ -58,9 +69,7 @@ class Pool:
     
     def get_unviolated_splitter(self, tune=True):
         if tune:
-            self.set_seed(seed=self.torch_seed)
-        else:
-            self.set_seed(self.const_seed)
+            self.set_seed(seed=self.random_seed)
         return self.shuffle_splitter.split(self.unviolated_lb_dataset)
     
     def fill_up(self):
@@ -69,14 +78,14 @@ class Pool:
     def update_splitter(self, val_share):
         self.shuffle_splitter = ShuffleSplit(n_splits=self.n_splits, 
                                              test_size=val_share,
-                                             random_state=self.torch_seed)
+                                             random_state=self.random_seed)
 
 
     def get_train_val_loaders(self, unviolated_train_idx, unviolated_val_idx):
         unviolated_train_ds = Subset(self.unviolated_lb_dataset, unviolated_train_idx)
         unviolated_val_ds = Subset(self.unviolated_lb_dataset, unviolated_val_idx)
 
-        self.set_seed(seed=self.torch_seed)
+        self.set_seed(seed=self.random_seed)
         train_loader = DataLoader(ConcatDataset((unviolated_train_ds, self.new_lb_dataset)),
                                   batch_size=self.batch_size, 
                                   drop_last=self.drop_last,
@@ -110,10 +119,9 @@ class Pool:
         
     def set_seed(self, seed=None):
         if seed is None:
-            seed = self.torch_seed
+            seed = self.random_seed
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
         np.random.seed(seed)
-        random.seed(seed)

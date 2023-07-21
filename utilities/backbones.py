@@ -68,19 +68,17 @@ class MetricsSet:
     def __init__(self, metrics_dict, device):
         self.raw_metrics_dict = metrics_dict
         self.device = device
-        self.result_dict = None
+        self.result_dict = {}
 
     def update(self, inputs, targets):
-        if not self.result_dict:
-            self.result_dict = {}
-            for name, configs in self.raw_metrics_dict.items():
-                attr = getattr(metrics, name)
-                self.result_dict[name] = attr(device=self.device, **configs)
+        for name, configs in self.raw_metrics_dict.items():
+            attr = getattr(metrics, name)
+            self.result_dict[name] = attr(device=self.device, **configs)
                 
         for metric in self.result_dict.values():
             metric.update(inputs, targets.argmax(dim=-1))
 
     def flush(self):
         results = {key:val.compute().item() for key, val in self.result_dict.items()}
-        self.result_dict = None
+        self.result_dict = {}
         return results

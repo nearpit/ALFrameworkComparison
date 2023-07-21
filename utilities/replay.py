@@ -13,6 +13,8 @@ class ReplayBuffer:
         self.feature_encoder = FunctionTransformer(lambda x: x)
         self.target_encoder = FunctionTransformer(lambda x: 1/(1 + np.exp(-x)))
 
+    def __len__(self):
+        return len(self._x)
 
     def push(self, x, y):
         self._x.append(x)

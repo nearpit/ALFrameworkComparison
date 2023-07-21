@@ -18,7 +18,7 @@ class Visualize:
             "new labeled": "x",
             "unviolated labeled": "^",
             "unlabeled": "2",
-            "added": "o"
+            "next added": "o"
         }
     max_dot_size = 150
     fontsize='medium'
@@ -50,23 +50,17 @@ class Visualize:
     def compute_clf_grad(self):
         self.clf_grad = (self.clf(self.clf_inputs)[:, 1]).reshape(self.x1.shape)
 
-    def clf_train(self, ax, train_perf, val_perf, chosen_idx=None):
+    def clf_train(self, ax, train_perf, val_perf):
         ax.contourf(self.x1, self.x2, self.clf_grad, levels=self.contour_levels, alpha=0.3, cmap=plt.cm.coolwarm, antialiased=True)
         x, y = self.pool.get("unlabeled")
         ax.scatter(x[:, 0], x[:, 1], marker='2', c='grey', alpha=0.4, s=self.max_dot_size)
 
         x, y = self.pool.get("unviolated")
         ax.scatter(x[:, 0], x[:, 1], marker=self.markers["unviolated labeled"], c=y.argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)
-        if chosen_idx:
-            x, y = self.pool.get("new_labeled")
-            chosen_x, chosen_y = x[-1], y[-1]
-            x, y = x[:-1], y[:-1]
-            ax.scatter(chosen_x[0], chosen_x[1], marker=self.markers["added"], linewidths=2, facecolor=plt.cm.coolwarm(chosen_y[1]*255), color="black", s=2*self.max_dot_size)
-            if len(y) == 1:
-                color = plt.cm.coolwarm(y.argmax(axis=-1)*255)
-            else:
-                color = y.argmax(axis=-1)
-            ax.scatter(x[:, 0], x[:, 1], marker=self.markers["new labeled"], c=color, s=self.max_dot_size, cmap=plt.cm.coolwarm)
+        x, y = self.pool.get("new_labeled")
+
+        color = plt.cm.coolwarm(y.argmax(axis=-1)*255)
+        ax.scatter(x[:, 0], x[:, 1], marker=self.markers["new labeled"], color=color, s=self.max_dot_size)
 
         ax.set_title("Classifier")
         performance_string = f"Train Acc {train_perf[1]['MulticlassAccuracy']:.1%}\nVal Acc {val_perf[1]['MulticlassAccuracy']:.1%}"
@@ -92,13 +86,10 @@ class Visualize:
     def acq_boundary(self, ax, chosen_idx):
         Z = (self.acq.get_scores(self.clf_inputs)).reshape(self.x1.shape)
         ax.contourf(self.x1, self.x2, Z, levels=self.contour_levels, cmap=plt.cm.binary, alpha=0.3, antialiased=True)
-        if chosen_idx:
-            x, y = self.pool.get("new_labeled")
-            chosen_x, chosen_y = x[-1], y[-1]
-            x, y = x[:-1], y[:-1]
-            ax.scatter(chosen_x[0], chosen_x[1], marker=self.markers["added"], linewidths=2, facecolor=plt.cm.coolwarm(chosen_y[1]*255), color="black", s=2*self.max_dot_size)
+        chosen_x, chosen_y = self.pool[chosen_idx]
         x, y = self.pool.get("unlabeled")
         ax.scatter(x[:, 0], x[:, 1], marker=self.markers["unlabeled"], c=y.argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)
+        ax.scatter(chosen_x[0], chosen_x[1], marker=self.markers["next added"], linewidths=2, facecolor=plt.cm.coolwarm(chosen_y[1]*255), color="black", s=2*self.max_dot_size)
         ax.set_title("Acquisition")
        
 
@@ -147,7 +138,7 @@ class Visualize:
         self.clf_colorbar(ax[0, 1])
 
         self.acq_boundary(ax[1, 0], chosen_idx)
-        self.clf_train(ax[1, 1], train_perf, val_perf, chosen_idx)
+        self.clf_train(ax[1, 1], train_perf, val_perf)
         self.plot_test_curve(ax[2, 0])
         self.clf_eval(ax[2, 1], test_perf, split="test")
 
@@ -158,11 +149,11 @@ class Visualize:
         unlabeled_point = Line2D([0], [0], label='Unlabeled', marker=self.markers['unlabeled'], markersize=self.markersize*1.5, color='black', linestyle='')
         test_points = Line2D([0], [0], label='Test', marker=self.markers['test'], markersize=self.markersize*1.25, color='black', linestyle='')
 
-        chosen_point = Line2D([0], [0], label='Added', marker=self.markers['added'],  markeredgewidth=2, markersize=self.markersize, markerfacecolor='grey', markeredgecolor='black', linestyle='')
+        chosen_point = Line2D([0], [0], label='Next Added', marker=self.markers['next added'],  markeredgewidth=2, markersize=self.markersize, markerfacecolor='grey', markeredgecolor='black', linestyle='')
         class_0 = mpatches.Patch(color=plt.cm.coolwarm(0), label='Class A')  
         class_1 = mpatches.Patch(color=plt.cm.coolwarm(255), label='Class B')  
 
-        legend_elements = [unviolated_labeled, new_labeled, unlabeled_point, chosen_point, test_points, class_0, class_1]
+        legend_elements = [chosen_point, unlabeled_point, unviolated_labeled, new_labeled, test_points, class_0, class_1]
         lgd = plt.figlegend(handles=legend_elements, 
                       loc='lower center', 
                       handletextpad=0.3,

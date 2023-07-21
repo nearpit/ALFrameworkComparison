@@ -57,5 +57,7 @@ pip install .
 - [X] Comparison of static hypers and online tuning?
 - [X] Diverging Sin Dataset
 - [ ] Adjust Keychain naive
+- [ ] Check Keychain Steep Level variable
+- [ ] Debug Coreset
 - [ ] AUC
 - [ ] Code keychain non-heuristics (naive + AE output, etc.)

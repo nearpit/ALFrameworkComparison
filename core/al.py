@@ -2,7 +2,7 @@ import logging
 import acquisitions, datasets, core, utilities
 
 class ActiveLearning:
-    n_trials = 50
+    n_trials = 10 # DEBUG
     
     def __init__(self, args):
         Dataclass = getattr(datasets, args.dataset.capitalize())
@@ -10,7 +10,7 @@ class ActiveLearning:
         self.random_seed = args.random_seed
         self.args = args
         Acqclass = getattr(acquisitions, args.algorithm.capitalize())
-        self.pool = core.Pool(data=Dataclass.get_data_dict(), torch_seed=self.random_seed, args=args)
+        self.pool = core.Pool(data=Dataclass.get_data_dict(), args=args)
 
         self.hyper_path = f"temp/hypers/{args.dataset}/"
         self.hyper_filename = f"{str(args.random_seed)}_{args.val_share}_{args.n_initially_labeled}_{args.online}.pkl"
@@ -42,35 +42,35 @@ class ActiveLearning:
                         "iteration"]]
        
     def run(self):
-        abs_idx, relative_idx = None, None
+        abs_idx = None
         train_perf, val_perf, test_perf = self.train_first_hypers(self.args.online)
-
+        iteraiton=0
         self.show_intermediate_results(abs_idx, train_perf, val_perf, test_perf)
-        self.visualize(0, train_perf, val_perf, test_perf, relative_idx)
         
         if self.budget <  self.pool.get_len("unlabeled"):
-            for iteration in range(1, self.budget + 1):
+            for iteration in range(0, self.budget):
 
-                abs_idx, relative_idx = self.acq.query()
+                abs_idx = self.acq.query()
+                self.visualize(iteration, train_perf, val_perf, test_perf, abs_idx)
+
                 self.pool.add_new_inst(abs_idx)
-
                 if self.args.online:
-                    train_perf, val_perf, test_perf = self.clf.tune_model(n_trials=self.n_trials)
+                    train_perf, val_perf, test_perf = self.clf.tune_model(n_trials=self.n_trials, online=self.args.online)
                 else:
                     train_perf, val_perf, test_perf = self.clf.train_model()
 
                 # LOGGINGS
                 self.show_intermediate_results(abs_idx, train_perf, val_perf, test_perf)
                 self.append_store_results(abs_idx, train_perf, val_perf, test_perf, iteration)
-                self.visualize(iteration, train_perf, val_perf, test_perf, relative_idx)
 
         # if we train on the whole dataset
         elif self.args.n_initially_labeled == self.pool.get_len("total"):        
             self.append_store_results(abs_idx, train_perf, val_perf, test_perf, 0)
+
         else:
             logging.warning(f'{"?"*70}Check your budget{"?"*70}')
         logging.warning(f'{"!"*70} DONE {"!"*70}')
-
+        self.visualize(iteraiton + 1, train_perf, val_perf, test_perf, abs_idx)
 
 
     def train_first_hypers(self, online):

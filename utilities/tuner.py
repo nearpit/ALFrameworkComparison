@@ -34,7 +34,7 @@ class Tuner(BaseClass):
         self.n_trials = n_trials  
         self.study_configs["pruner"] = optuna.pruners.MedianPruner(n_warmup_steps=int((self.pool.n_splits)*self.share_warmup_steps), **self.pruner_configs)
         self.study_configs["direction"] = direction
-        self.study_configs["sampler"] = optuna.samplers.TPESampler(seed=self.pool.torch_seed)
+        self.study_configs["sampler"] = optuna.samplers.TPESampler(seed=self.pool.random_seed)
 
 
     def __call__(self):

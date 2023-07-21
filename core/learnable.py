@@ -15,9 +15,6 @@ class Learnable:
     model_configs = {"MLP_clf": {"last_activation": "Softmax",
                                  "last_activation_configs": {"dim":-1},
                                  "criterion": "CrossEntropyLoss"},
-                     "MLP_reg": {"last_activation": "Identity",
-                                 "last_activation_configs": {},
-                                 "criterion": "MSELoss"},
                      "AE": {"last_activation": "Identity",
                             "last_activation_configs": {},
                             "criterion": "MSELoss"}}
@@ -150,5 +147,7 @@ class Learnable:
         unviolated_train_idx, unviolated_val_idx = next(self.pool.get_unviolated_splitter(tune=False))
         train_loader, val_loader = self.pool.get_train_val_loaders(unviolated_train_idx, unviolated_val_idx)
         train_perf, val_perf = self.fit(train_loader=train_loader, val_loader=val_loader)
-        test_perf = self.eval(loader=self.pool.test_loader)
+        test_perf = None
+        if hasattr(self.pool, "test_loader"):
+            test_perf = self.eval(loader=self.pool.test_loader)
         return train_perf, val_perf, test_perf
