@@ -11,7 +11,7 @@ class ReplayBuffer:
         self._x = deque(maxlen=capacity)
         self._y = deque(maxlen=capacity)
         self.feature_encoder = FunctionTransformer(lambda x: x)
-        self.target_encoder = FunctionTransformer(lambda x: 1/(1 + np.exp(-x)))
+        self.target_encoder = FunctionTransformer(lambda x: 1/(1 + np.exp(-250*(x-1))))
 
     def __len__(self):
         return len(self._x)

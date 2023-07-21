@@ -12,10 +12,9 @@ class Keychain(Acquisition):
     meta_arch = NN
     n_meta_trials = 25 # DEBUG
                                             # DEBUG
-    def __init__(self, buffer_capacity=1, forward_passes=25, sample_share=0.1, steep_level = 10, *args, **kwargs):
+    def __init__(self, buffer_capacity=1, forward_passes=25, sample_share=0.2, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.buffer = ReplayBuffer(capacity=buffer_capacity)
-        self.steep_level = steep_level
         self.forward_passes = forward_passes
         self.sample_share = sample_share
         self.meta_val_perf = []
@@ -51,9 +50,9 @@ class Keychain(Acquisition):
         relative_unviolated_idx = np.arange(unviolated_train_idx.shape[0])
         relative_new_idx = np.arange(intact_new_labeled_idx.shape[0])
 
-        self.raw_targets_unviolated = np.vectorize(lambda x: OnlineAvg())(np.zeros((len(unviolated_train_idx), 1)))
+        self.raw_targets_unviolated = np.vectorize(lambda x: OnlineAvg(1))(np.zeros((len(unviolated_train_idx), 1)))
         if len(relative_new_idx):
-            self.raw_targets_new = np.vectorize(lambda x: OnlineAvg())(np.zeros((len(intact_new_labeled_idx), 1)))
+            self.raw_targets_new = np.vectorize(lambda x: OnlineAvg(1))(np.zeros((len(intact_new_labeled_idx), 1)))
         else:
             self.raw_targets_new = np.empty((0, 1))
 
@@ -61,25 +60,25 @@ class Keychain(Acquisition):
             np.random.seed(idx)
             
             if len(relative_new_idx):
-                new_idx_probs = self.get_probs(self.raw_targets_new)[relative_new_idx]
-                sample_new_idx  = np.random.choice(relative_new_idx, int(len(relative_new_idx)*(1-self.sample_share)), replace=False, p=new_idx_probs)
+                extra_new_idx  = np.random.choice(relative_new_idx, int(len(relative_new_idx)*self.sample_share), replace=False)
+                sample_new_idx = np.append(relative_new_idx, extra_new_idx)
             else:
+                extra_new_idx = np.array([], dtype=int)
                 sample_new_idx = np.array([], dtype=int)
 
             current_pool.idx_new_lb = intact_new_labeled_idx[sample_new_idx]
             playground_clf.pool = current_pool
 
-            unviolated_idx_probs = self.get_probs(self.raw_targets_unviolated)
-
-            sample_unviolated_idx = np.random.choice(relative_unviolated_idx, int(len(relative_unviolated_idx)*(1-self.sample_share)), replace=False, p=unviolated_idx_probs)
+            extra_unviolated_idx = np.random.choice(relative_unviolated_idx, int(len(relative_unviolated_idx)*self.sample_share), replace=False)
+            sample_unviolated_idx = np.append(relative_unviolated_idx, extra_unviolated_idx)
             temp_unviolated_train_idx = unviolated_train_idx[sample_unviolated_idx]
 
             train_loader, val_loader = current_pool.get_train_val_loaders(temp_unviolated_train_idx, unviolated_val_idx)
             train_perf, val_perf = playground_clf.fit(train_loader=train_loader, val_loader=val_loader)
-            loss = (val_perf[0] - best_loss)*self.steep_level
+            loss = best_loss/val_perf[0]
 
-            self.raw_targets_unviolated[np.delete(relative_unviolated_idx, sample_unviolated_idx)] += loss
-            self.raw_targets_new[np.delete(relative_new_idx, sample_new_idx)] += loss
+            self.raw_targets_unviolated[extra_unviolated_idx] += loss
+            self.raw_targets_new[extra_new_idx] += loss
         
 
         x, _ = self.pool.get("unviolated")

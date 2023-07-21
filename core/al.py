@@ -2,7 +2,7 @@ import logging
 import acquisitions, datasets, core, utilities
 
 class ActiveLearning:
-    n_trials = 10 # DEBUG
+    n_trials = 25 # DEBUG
     
     def __init__(self, args):
         Dataclass = getattr(datasets, args.dataset.capitalize())
@@ -44,7 +44,6 @@ class ActiveLearning:
     def run(self):
         abs_idx = None
         train_perf, val_perf, test_perf = self.train_first_hypers(self.args.online)
-        iteraiton=0
         self.show_intermediate_results(abs_idx, train_perf, val_perf, test_perf)
         
         if self.budget <  self.pool.get_len("unlabeled"):
@@ -70,7 +69,7 @@ class ActiveLearning:
         else:
             logging.warning(f'{"?"*70}Check your budget{"?"*70}')
         logging.warning(f'{"!"*70} DONE {"!"*70}')
-        self.visualize(iteraiton + 1, train_perf, val_perf, test_perf, abs_idx)
+        self.visualize("final", train_perf, val_perf, test_perf, abs_idx)
 
 
     def train_first_hypers(self, online):
