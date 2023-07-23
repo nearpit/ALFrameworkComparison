@@ -21,7 +21,10 @@ class Pool:
         self.val_share = val_share
 
         if n_initially_labeled is None:
-            n_initially_labeled = args.n_initially_labeled
+            if args.n_initially_labeled == -1:
+                n_initially_labeled = len(self.idx_abs)
+            else:
+                n_initially_labeled = args.n_initially_labeled
         self.n_initially_labeled = n_initially_labeled
         
         self.set_seed(self.random_seed)

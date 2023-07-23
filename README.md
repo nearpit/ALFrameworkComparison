@@ -47,17 +47,27 @@ pip install .
 
 - [X] 50 tuning trials
 - [X] Budget ~40 % of the train split
-- [X] n initially labeled: [20, 60, 100, all (perfect performance)]
-- [X] Validation share: [10%, 50%, 90%]
+- [ ] Initially labeled:
+  - [X] 20
+  - [ ] 60
+  - [ ] 100
+  - [X] all (perfect performance)
+- [ ] Validation share
+  - [ ] 10%
+  - [X] 50%
+  - [ ] 90%
 
 ### \#TODO
 
-- [X] Pytorch seed for splitting as well
-- [X] What toy dataset(-s) to use? Moons, Adversarial Moons, Blobs
-- [X] Comparison of static hypers and online tuning?
-- [X] Diverging Sin Dataset
 - [ ] Adjust Keychain naive
-- [ ] Check Keychain Steep Level variable
 - [ ] Debug Coreset
+- [ ] Remove log(loss) in visualization
 - [ ] AUC
+
+## Further steps after the master's thesis
+
+- [ ] Try out above-mentioned online tuning circumstances
+- [ ] Check Keychain Steep Level variable
 - [ ] Code keychain non-heuristics (naive + AE output, etc.)
+- [ ] Find how to make replay buffer work
+- [ ] Batch-wise keychain

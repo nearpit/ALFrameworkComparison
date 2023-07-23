@@ -25,6 +25,6 @@ class OnlineAvg:
     
     def __lt__(self, other):
         return self.val < float(other)
-    
+
     def __truediv__(self, other):
         return self.val / float(other)

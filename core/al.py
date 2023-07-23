@@ -2,7 +2,7 @@ import logging
 import acquisitions, datasets, core, utilities
 
 class ActiveLearning:
-    n_trials = 25 # DEBUG
+    n_trials = 50 # DEBUG
     
     def __init__(self, args):
         Dataclass = getattr(datasets, args.dataset.capitalize())
@@ -18,7 +18,7 @@ class ActiveLearning:
         self.clf = core.Learnable(pool=self.pool, 
                                   model_configs=self.best_hypers,
                                   random_seed=self.random_seed)
-        self.acq = Acqclass(clf=self.clf, pool=self.pool, random_seed=self.random_seed)
+        self.acq = Acqclass(clf=self.clf, pool=self.pool, random_seed=self.random_seed, budget=self.budget)
         if Dataclass.visualize:
             self.visualizer = utilities.Visualize(self.pool, self.clf, self.acq, total_budget=self.budget)
 

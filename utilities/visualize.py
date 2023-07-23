@@ -84,12 +84,15 @@ class Visualize:
                     bbox=dict(boxstyle='round', fc='w'))          
         
     def acq_boundary(self, ax, chosen_idx):
-        Z = (self.acq.get_scores(self.clf_inputs)).reshape(self.x1.shape)
-        ax.contourf(self.x1, self.x2, Z, levels=self.contour_levels, cmap=plt.cm.binary, alpha=0.3, antialiased=True)
-        chosen_x, chosen_y = self.pool[chosen_idx]
+        
+        if chosen_idx:
+            Z = (self.acq.get_scores(self.clf_inputs)).reshape(self.x1.shape)
+            ax.contourf(self.x1, self.x2, Z, levels=self.contour_levels, cmap=plt.cm.binary, alpha=0.3, antialiased=True)
+            chosen_x, chosen_y = self.pool[chosen_idx]
+            ax.scatter(chosen_x[0], chosen_x[1], marker=self.markers["next added"], linewidths=2, facecolor=plt.cm.coolwarm(chosen_y[1]*255), color="black", s=2*self.max_dot_size)
+
         x, y = self.pool.get("unlabeled")
         ax.scatter(x[:, 0], x[:, 1], marker=self.markers["unlabeled"], c=y.argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)
-        ax.scatter(chosen_x[0], chosen_x[1], marker=self.markers["next added"], linewidths=2, facecolor=plt.cm.coolwarm(chosen_y[1]*255), color="black", s=2*self.max_dot_size)
         ax.set_title("Acquisition")
        
 
@@ -102,7 +105,7 @@ class Visualize:
         [l.set_visible(False) for (i,l) in enumerate(ax.xaxis.get_ticklabels()) if i % keep_every != 0]
         ax.set_title("Test Performance")
         ax.set_xlabel("Iteration")
-        ax.set_ylabel("Log Loss")
+        ax.set_ylabel("CE Loss")
         ax.grid(alpha=0.7)
 
 
@@ -136,7 +139,6 @@ class Visualize:
         self.compute_clf_grad()
         self.acq_colorbar(ax[0, 0])
         self.clf_colorbar(ax[0, 1])
-
         self.acq_boundary(ax[1, 0], chosen_idx)
         self.clf_train(ax[1, 1], train_perf, val_perf)
         self.plot_test_curve(ax[2, 0])

@@ -6,15 +6,15 @@ from utilities import NN, EarlyStopper, Tuner, OnlineAvg
 class Learnable:
 
     #DEBUG
-    epochs = 1000
-    patience = 20
-    n_warmup_epochs = 100
     avg_val_loss = 0
     model = None
     model_class = NN
     model_configs = {"MLP_clf": {"last_activation": "Softmax",
                                  "last_activation_configs": {"dim":-1},
                                  "criterion": "CrossEntropyLoss"},
+                    "MLP_reg": {"last_activation": "Identity",
+                                "last_activation_configs": {},
+                                "criterion": "MSELoss"},
                      "AE": {"last_activation": "Identity",
                             "last_activation_configs": {},
                             "criterion": "MSELoss"}}
@@ -24,10 +24,17 @@ class Learnable:
                  pool,
                  random_seed,
                  model_configs=None,
-                 model_arch_name="MLP_clf"):
+                 model_arch_name="MLP_clf",
+                 n_warmup_epochs=100,
+                 patience=20,
+                 epochs=1000):
         
         self.random_seed = random_seed
-        # Reproducibility
+        
+        self.n_warmup_epochs = n_warmup_epochs
+        self.epochs = epochs
+        self.patience = patience
+
         self.pool = pool
         self.model_arch_name = model_arch_name
         self.model_configs = self.model_configs[model_arch_name].copy()
@@ -113,7 +120,7 @@ class Learnable:
 
             train_metrics = self.model.metrics_set.flush()
             val_loss, val_metrics = self.eval(val_loader)
-            if early_stopper.early_stop(val_loss):
+            if early_stopper.early_stop(float(val_loss)):
                 break
         return (train_loss, train_metrics),  (val_loss, val_metrics)
        
@@ -125,8 +132,6 @@ class Learnable:
                     layer.reset_parameters()
 
     def tune_model(self, n_trials, online, tunable_hypers=None):
-        if tunable_hypers is None:
-            tunable_hypers = Tuner.all_hypers.copy()
         pool = copy.copy(self.pool)
         if not online:
             pool.fill_up()
@@ -138,7 +143,7 @@ class Learnable:
                                     previous_loss=self.avg_val_loss)()
         # Update the avg loss
         if not self.avg_val_loss or avg_val_loss < self.avg_val_loss:
-            self.avg_val_loss = avg_val_loss
+            self.avg_val_loss = float(avg_val_loss)
             
         self.update_model_configs(new_configs)
         return self.train_model()

@@ -7,10 +7,12 @@ class Acquisition:
     def __init__(self, 
                  clf,
                  pool,
-                 random_seed):
+                 random_seed,
+                 budget):
         self.clf = clf       
         self.pool = pool
         self.random_seed = random_seed
+        self.budget = budget
 
     def get_scores(self):
         pass

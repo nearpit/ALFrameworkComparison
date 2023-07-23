@@ -7,9 +7,11 @@ import utilities
 class BaseClass:
     all_hypers = {"lr", "weight_decay", "layers_size"}
 
-    def __init__(self, pool, clf, tunable_hypers):
+    def __init__(self, pool, clf, tunable_hypers=None):
         self.pool = pool
         self.clf = clf
+        if tunable_hypers is None:
+            tunable_hypers = self.all_hypers.copy()
         self.tunable_hypers = tunable_hypers
 
     def add_input_output_size(self, layers_size):
@@ -26,7 +28,7 @@ class Tuner(BaseClass):
     #CAVEAT check the objective direction   #DEBUG  
     def __init__(self, n_trials, previous_loss=None, direction="minimize", *args, **kwargs):    
         super().__init__(*args, **kwargs)
-        # optuna.logging.set_verbosity(optuna.logging.WARNING) #DEBUG
+        optuna.logging.set_verbosity(optuna.logging.WARNING) #DEBUG
         if previous_loss:
             self.callbacks = [StopWhenFoundBetter(previous_loss)]
         else:
@@ -92,12 +94,12 @@ class Objective(BaseClass):
             train_loader, val_loader = self.pool.get_train_val_loaders(train_idx, val_idx)
             train_perf, val_perf = self.clf.fit(train_loader=train_loader, val_loader=val_loader)
             val_loss += float(val_perf[0])
-            print(fold_num, suggest_dict, val_perf)
+            # print(fold_num, suggest_dict, val_perf)
 
             trial.report(float(val_loss), fold_num)
             if trial.should_prune():
                 raise optuna.TrialPruned()
-        trial.set_user_attr("avg_val_loss", val_loss)
+        trial.set_user_attr("avg_val_loss", float(val_loss))
         return float(val_loss)
 
 
