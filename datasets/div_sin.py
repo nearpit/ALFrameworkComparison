@@ -5,16 +5,16 @@ from datasets.toy import Toy
 class Div_sin(Toy):
     dataset_name = "div_sin"
     sin_freq = 2
-    divergence_factor = 0.3
+    divergence_factor = 0.15
     curve_distance=0
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
    
-    def generate_clean(self, noise=0.5):
+    def generate_clean(self, noise=0.2):
         n_samples=int((self.configs["n_instances"] - self.configs["n_honeypot"])/2)
-        x = np.linspace(0, 10, n_samples)
+        x = np.linspace(0, 6, n_samples)
         sin_curve = np.sin(self.sin_freq*x)
 
         # Cluster above the curve

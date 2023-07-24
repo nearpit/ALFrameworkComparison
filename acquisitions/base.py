@@ -24,13 +24,3 @@ class Acquisition:
         idx = np.random.choice(max_scores, 1)[0]
         return self.pool.idx_ulb[idx]
     
-    # auxiliary function for latent representations
-    def get_activation(self, name):
-        def hook(model, input, output):
-            value = torch.clone(output.detach())
-            self.latent = value
-        return hook
-
-    def embedding_hook(self): # define the hooked layers if needed
-        pass
-    

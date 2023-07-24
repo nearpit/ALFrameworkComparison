@@ -9,12 +9,13 @@ class Coreset(Acquisition):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
     
-    @Learnable.hook_once    
+    # @Learnable.hook_once    
     def get_scores(self, values=None):
         if values is None:
             values = self.pool.get("unlabeled")[0]
 
-        latent_ulb, latent_lb = self.get_embeddings(values), self.get_embeddings(self.pool.get("all_labeled")[0])
+        latent_ulb = self.get_embeddings(values).clone()
+        latent_lb = self.get_embeddings(self.pool.get("all_labeled")[0]).clone()
         pair_distance = pairwise_distances(latent_ulb.cpu(), latent_lb.cpu())
         min_dist = np.amin(pair_distance, axis=1)
 
@@ -22,11 +23,4 @@ class Coreset(Acquisition):
 
     def get_embeddings(self, inputs):
         self.clf(torch.Tensor(inputs))
-        return self.latent
-    
-    def embedding_hook(self):
-        # penultimate layer hook
-        total_layer_depth = len(self.clf.model_configs["layers_size"])
-        penultimate_layer_name = f"dense_{total_layer_depth - 2}" 
-        penultimate_layer = getattr(self.clf.model.layers, penultimate_layer_name)
-        penultimate_layer.register_forward_hook(self.get_activation(penultimate_layer_name))
+        return self.clf.latent

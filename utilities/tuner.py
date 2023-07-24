@@ -23,12 +23,12 @@ class Tuner(BaseClass):
                                               # How many fold it warms up
     pruner_configs = {"n_startup_trials": 5}
     study_configs = {}
-    share_warmup_steps = 0.6
+    share_warmup_steps = 0.4
 
     #CAVEAT check the objective direction   #DEBUG  
     def __init__(self, n_trials, previous_loss=None, direction="minimize", *args, **kwargs):    
         super().__init__(*args, **kwargs)
-        optuna.logging.set_verbosity(optuna.logging.WARNING) #DEBUG
+        # optuna.logging.set_verbosity(optuna.logging.WARNING) #DEBUG
         if previous_loss:
             self.callbacks = [StopWhenFoundBetter(previous_loss)]
         else:
@@ -94,7 +94,7 @@ class Objective(BaseClass):
             train_loader, val_loader = self.pool.get_train_val_loaders(train_idx, val_idx)
             train_perf, val_perf = self.clf.fit(train_loader=train_loader, val_loader=val_loader)
             val_loss += float(val_perf[0])
-            # print(fold_num, suggest_dict, val_perf)
+            print(fold_num, suggest_dict, val_perf)
 
             trial.report(float(val_loss), fold_num)
             if trial.should_prune():

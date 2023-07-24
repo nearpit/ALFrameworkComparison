@@ -3,7 +3,7 @@
     "n_instances": 3186, 
     "n_classes": 3,
     "batch_size": 32,
-    "budget": 800,
+    "budget": 600,
     "metrics_dict": {
         "MulticlassAccuracy": {
             "num_classes": 3

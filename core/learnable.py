@@ -27,7 +27,7 @@ class Learnable:
                  model_arch_name="MLP_clf",
                  n_warmup_epochs=100,
                  patience=20,
-                 epochs=1000):
+                 epochs=200):
         
         self.random_seed = random_seed
         
@@ -49,18 +49,6 @@ class Learnable:
     def __call__(self, x):
       with torch.no_grad():
         return self.model(x.to(self.device))
-
-    @staticmethod
-    def hook_once(func):
-            called = False  
-            def wrapper(self, *args, **kwargs):
-                nonlocal called
-                if not called:
-                    called = True
-                    self.embedding_hook() # to make sure that we hook once at the right moment
-                return func(self, *args, **kwargs)
-
-            return wrapper
     
     def initilize_first(func):
         def wrapper(self, *args, **kwargs):
@@ -77,6 +65,7 @@ class Learnable:
         self.model_configs.update(new_configs)
         self.model = self.initialize_model()
         self.model.to(self.device)
+        self.embedding_hook()
     
     def eval(self, loader):
         total_loss = OnlineAvg()
@@ -99,7 +88,7 @@ class Learnable:
 
         self.reset_model()       # To bring the model to the same starting point
         self.model.eval()        # To disable Dropout 
-        early_stopper = EarlyStopper(patience=self.patience, n_warmup_epochs=self.n_warmup_epochs)
+        # early_stopper = EarlyStopper(patience=self.patience, n_warmup_epochs=self.n_warmup_epochs)
         train_loss = OnlineAvg()
 
         for epoch_num in range(self.epochs):
@@ -120,8 +109,8 @@ class Learnable:
 
             train_metrics = self.model.metrics_set.flush()
             val_loss, val_metrics = self.eval(val_loader)
-            if early_stopper.early_stop(float(val_loss)):
-                break
+            # if early_stopper.early_stop(float(val_loss)):
+            #     break
         return (train_loss, train_metrics),  (val_loss, val_metrics)
        
     def reset_model(self):
@@ -156,3 +145,18 @@ class Learnable:
         if hasattr(self.pool, "test_loader"):
             test_perf = self.eval(loader=self.pool.test_loader)
         return train_perf, val_perf, test_perf
+    
+
+    def embedding_hook(self):
+        # penultimate layer hook
+        total_layer_depth = len(self.model_configs["layers_size"])
+        penultimate_layer_name = f"dense_{total_layer_depth - 2}" 
+        penultimate_layer = getattr(self.model.layers, penultimate_layer_name)
+        penultimate_layer.register_forward_hook(self.get_activation(penultimate_layer_name))
+
+    # auxiliary function for latent representations
+    def get_activation(self, name):
+        def hook(model, input, output):
+            value = torch.clone(output.detach())
+            self.latent = value
+        return hook

@@ -3,11 +3,13 @@ import os
 import utilities
 import csv
 
-def gather_results(args, idx_added, test_perf, val_perf, train_perf, pool, idx):
+def gather_results(args, idx_added, features_added, target_added, test_perf, val_perf, train_perf, pool, idx):
         return [args.dataset, 
                 args.algorithm, 
                 args.random_seed, 
                 idx_added, 
+                features_added,
+                target_added,
                 test_perf[0], 
                 test_perf[1]["MulticlassAccuracy"], 
                 val_perf[0], 

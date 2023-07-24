@@ -2,7 +2,7 @@ import logging
 import acquisitions, datasets, core, utilities
 
 class ActiveLearning:
-    n_trials = 50 # DEBUG
+    n_trials = 2 # DEBUG
     
     def __init__(self, args):
         Dataclass = getattr(datasets, args.dataset.capitalize())
@@ -27,7 +27,9 @@ class ActiveLearning:
         self.results = [["dataset", 
                         "algorithm", 
                         "random_seed",
-                        "added", 
+                        "idx_added", 
+                        "features_added",
+                        "target_added",
                         "test_loss", 
                         "test_acc", 
                         "val_loss", 
@@ -60,11 +62,12 @@ class ActiveLearning:
 
                 # LOGGINGS
                 self.show_intermediate_results(abs_idx, train_perf, val_perf, test_perf)
-                self.append_store_results(abs_idx, train_perf, val_perf, test_perf, iteration)
+                features_added, target_added = self.pool[abs_idx]
+                self.append_store_results(abs_idx, features_added, target_added, train_perf, val_perf, test_perf, iteration)
 
         # if we train on the whole dataset
-        elif self.args.n_initially_labeled == self.pool.get_len("total"):        
-            self.append_store_results(abs_idx, train_perf, val_perf, test_perf, 0)
+        elif self.args.n_initially_labeled == -1:        
+            self.append_store_results(abs_idx, None, train_perf, val_perf, test_perf, 0)
 
         else:
             logging.warning(f'{"?"*70}Check your budget{"?"*70}')
@@ -89,6 +92,6 @@ class ActiveLearning:
         if hasattr(self, "visualizer"):
             self.visualizer.make_plots(self.args, iteration, train_perf, val_perf, test_perf, self.results_path + "plots/", chosen_idx)
 
-    def append_store_results(self, abs_idx, train_perf, val_perf, test_perf, iteration):
-        self.results.append(utilities.gather_results(self.args, abs_idx, test_perf, val_perf, train_perf, self.pool, iteration))
+    def append_store_results(self, abs_idx, features_added, target_added, train_perf, val_perf, test_perf, iteration):
+        self.results.append(utilities.gather_results(self.args, abs_idx, features_added, target_added, test_perf, val_perf, train_perf, self.pool, iteration))
         utilities.store_csv(self.results, filename=str(self.args.random_seed).zfill(2), path=self.results_path)

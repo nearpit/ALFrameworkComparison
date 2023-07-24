@@ -60,11 +60,14 @@ pip install .
 ### \#TODO
 
 - [X] Adjust Keychain naive
-- [ ] Debug Coreset
-- [ ] Keychain Autoencoder
+- [X] Debug Coreset
 - [X] Remove log(loss) in visualization
-- [ ] AUC
-- [ ] Debug dataset budget config
+- [X] Query density plots
+  - [X] added_x, added_y
+  - [X] added_idx
+- [X] Debug dataset budget config
+- [ ] Keychain Autoencoder
+- [ ] AUC?
 
 ## Further steps after the master's thesis
 
