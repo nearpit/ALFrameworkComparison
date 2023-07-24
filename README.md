@@ -72,7 +72,5 @@ pip install .
 ## Further steps after the master's thesis
 
 - [ ] Try out above-mentioned online tuning circumstances
-- [ ] Check Keychain Steep Level variable
-- [ ] Code keychain non-heuristics (naive + AE output, etc.)
 - [ ] Find how to make replay buffer work
 - [ ] Batch-wise keychain
