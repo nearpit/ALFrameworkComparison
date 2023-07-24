@@ -48,7 +48,7 @@ class Visualize:
 
     
     def compute_clf_grad(self):
-        self.clf_grad = (self.clf(self.clf_inputs)[:, 1]).reshape(self.x1.shape)
+        self.clf_grad = (self.clf(self.clf_inputs)[:, 1]).cpu().reshape(self.x1.shape)
 
     def clf_train(self, ax, train_perf, val_perf):
         ax.contourf(self.x1, self.x2, self.clf_grad, levels=self.contour_levels, alpha=0.3, cmap=plt.cm.coolwarm, antialiased=True)
@@ -98,7 +98,7 @@ class Visualize:
 
     def plot_test_curve(self, ax, keep_every=2):
         current_len = len(self.test_perf)
-        ax.plot(np.arange(0, current_len, 1), np.log(self.test_perf), c='black')
+        ax.plot(np.arange(0, current_len, 1), self.test_perf, c='black')
         ax.set_xticks(np.arange(0, self.total_budget+1, 10))
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
 

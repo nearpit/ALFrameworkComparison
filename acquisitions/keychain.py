@@ -32,7 +32,7 @@ class Keychain(Acquisition):
             values, y = self.pool.get("unlabeled")
 
         inputs = self.collect_inputs(values)
-        scores = self.meta_acq(torch.Tensor(inputs))
+        scores = self.meta_acq(torch.Tensor(inputs)).cpu()
         return scores[:, 0] 
     
           

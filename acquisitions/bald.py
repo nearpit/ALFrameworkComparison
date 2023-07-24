@@ -22,4 +22,4 @@ class Bald(Acquisition):
         total_uncertainty = -(average_prob*torch.log(average_prob)).sum(dim=-1)
         data_uncertainty = (-(total_predictions*torch.log(total_predictions))).sum(dim=-1).mean(dim=0)
         knowledge_uncertainty = total_uncertainty - data_uncertainty
-        return knowledge_uncertainty
+        return knowledge_uncertainty.cpu()

@@ -59,10 +59,12 @@ pip install .
 
 ### \#TODO
 
-- [ ] Adjust Keychain naive
+- [X] Adjust Keychain naive
 - [ ] Debug Coreset
-- [ ] Remove log(loss) in visualization
+- [ ] Keychain Autoencoder
+- [X] Remove log(loss) in visualization
 - [ ] AUC
+- [ ] Debug dataset budget config
 
 ## Further steps after the master's thesis
 

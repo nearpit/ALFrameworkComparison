@@ -8,7 +8,7 @@ class Entropy(Acquisition):
     def get_scores(self, values=None):
         if values is None:
             values, y = self.pool.get("unlabeled")
-        probs = self.clf(torch.Tensor(values))
+        probs = self.clf(torch.Tensor(values)).cpu()
         log_probs = torch.log(probs)
         U = -(probs*log_probs).sum(axis=1)
         return U
