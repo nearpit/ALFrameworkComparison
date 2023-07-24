@@ -66,7 +66,7 @@ pip install .
   - [X] added_x, added_y
   - [X] added_idx
 - [X] Debug dataset budget config
-- [ ] Keychain Autoencoder
+- [X] Keychain Autoencoder
 - [ ] AUC?
 
 ## Further steps after the master's thesis
