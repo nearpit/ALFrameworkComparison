@@ -1,4 +1,4 @@
-from .base import VectoralDataset, ReplayDataset
+from .base import VectoralDataset, ReplayDataset, AutoEncoderDataset
 
 from .dna import Dna
 from .splice import Splice

@@ -4,5 +4,4 @@ from .entropy import Entropy
 from .margin import Margin
 from .bald import Bald
 from .coreset import Coreset
-from .keychain import Keychain
-# from .alrm import Alrm
+from .keychain import Keychain_naive, Keychain_autoencoder

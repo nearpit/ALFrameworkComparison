@@ -129,11 +129,29 @@ class ReplayDataset(Dataset):
         self.y = y
         self.configs = {
             "train_size": len(x),
-            "n_labeled" : len(x),
             "batch_size": 32,
             "metrics_dict": {},
             "n_features": x.shape[1],
             "n_classes": y.shape[1]
+        }
+   
+    def __len__(self):
+         return self.x.shape[0]
+        
+    def __getitem__(self, idx):
+        return self.x[idx], self.y[idx]
+    
+class AutoEncoderDataset(Dataset):
+    def __init__(self, x, batch_size, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.x = x
+        self.y = x
+        self.configs = {
+            "train_size": len(x),
+            "batch_size": batch_size,
+            "metrics_dict": {},
+            "n_features": x.shape[1],
+            "n_classes": x.shape[1]
         }
    
     def __len__(self):

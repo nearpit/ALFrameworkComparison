@@ -46,36 +46,37 @@ class Tuner(BaseClass):
                                  tunable_hypers=self.tunable_hypers), 
                        n_trials=self.n_trials,
                        callbacks=self.callbacks)
-        return self.align_params(study.best_params), study.best_trial.user_attrs["avg_val_loss"]
+        return study.best_trial.user_attrs["suggested_dict"], study.best_trial.user_attrs["avg_val_loss"]
     
     
-    def align_params(self, best_params):
-        decoded_params = {
-            "lr": best_params["lr"],
-            "weight_decay": best_params["weight_decay"]
-        }
+    # def align_params(self, best_params):
+    #     decoded_params = {
+    #         "lr": best_params["lr"],
+    #         "weight_decay": best_params["weight_decay"]
+    #     }
 
-        if "layers_size" in best_params:
-            decoded_params["layers_size"] = best_params["layers_size"]
-        else:
-            width_dict = {k: v for k, v in best_params.items() if "width_" in k}
-            layers_size = []
-            for idx, _ in enumerate(width_dict.keys()):
-                layers_size.append(width_dict[f"width_{idx}"])
-            if self.clf.model_arch_name  == "AE":
-                # TODO check whether it works correctly
-                layers_size.extend(layers_size[1::-1])
+    #     if "layers_size" in best_params:
+    #         decoded_params["layers_size"] = best_params["layers_size"]
+    #     else:
+    #         width_dict = {k: v for k, v in best_params.items() if "width_" in k}
+    #         layers_size = []
+    #         for idx, _ in enumerate(width_dict.keys()):
+    #             layers_size.append(width_dict[f"width_{idx}"])
+    #         if self.clf.model_arch_name  == "AE":
+    #             # TODO check whether it works correctly
+    #             layers_size.extend(layers_size[1::-1])
             
-            decoded_params["layers_size"] = self.add_input_output_size(layers_size)
+    #         decoded_params["layers_size"] = self.add_input_output_size(layers_size)
 
-        return decoded_params
+    #     return decoded_params
 
 class Objective(BaseClass):
     ranges = {
         "weight_decay": {"low": 1e-6, "high":1e-1, "log":True},
         "depth": {"low": 1, "high":5},
         "width": {"low": 2, "high": 96},
-        "lr": {"low": 1e-4, "high":5e-1}
+        "lr": {"low": 1e-4, "high":5e-1},
+        "dim_coef": {"low": 0.1, "high": 0.5}
         }
 
     def __init__(self, *args, **kwargs):
@@ -88,6 +89,7 @@ class Objective(BaseClass):
 
     def __call__(self, trial):
         suggest_dict = self.suggest_params(trial)
+        trial.set_user_attr("suggested_dict", suggest_dict)
         self.clf.update_model_configs(suggest_dict)
         val_loss = utilities.OnlineAvg()
         for fold_num, (train_idx, val_idx) in enumerate(self.pool.get_unviolated_splitter(tune=True)):
@@ -124,20 +126,21 @@ class Objective(BaseClass):
             layers_size.append(trial.suggest_int(f"width_{idx}", **self.ranges["width"]))
         return layers_size
 
-    # def define_AE(self, trial):
-    #     current_width = trial.suggest_int("width_0", **self.params_ranges["width"])
-    #     bottleneck =  trial.suggest_int("bottleneck", self.params_ranges["width"]["low"], current_width - 1) # -1 to exclude upper bound
-    #     layers_size = [current_width, bottleneck, current_width]
+    def define_AE(self, trial):
+        current_width = trial.suggest_int("width_0", **self.ranges["width"])
+        bottleneck =  trial.suggest_int("bottleneck", self.ranges["width"]["low"], max(self.ranges["width"]["low"], current_width/2))
+        diminishing_coef = trial.suggest_float("dim_coef", **self.ranges["dim_coef"])
+        layers_size = [current_width, bottleneck, current_width]
 
-    #     current_width = trial.suggest_int(f"width_{1}", bottleneck, current_width - 1) # -1 to exclude upper bound
-    #     i = 2
+        current_width = int(current_width*diminishing_coef)
+        i = 1
 
-    #     while current_width > bottleneck:
-    #         layers_size.insert(i, current_width)
-    #         layers_size.insert(-i, current_width)
-    #         current_width = trial.suggest_int(f"width_{i}", bottleneck, current_width - 1) # -1 to exclude upper bound
-    #         i += 1
-    #     return layers_size
+        while current_width > bottleneck:
+            layers_size.insert(i, current_width)
+            layers_size.insert(-i, current_width)
+            i += 1
+            current_width = int(current_width*diminishing_coef)
+        return layers_size
 
 class StopWhenFoundBetter:
     def __init__(self, previous_loss):
