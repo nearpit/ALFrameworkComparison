@@ -164,6 +164,6 @@ class Visualize:
                       fancybox=True, 
                       shadow=True)
 
-        utilities.makedir(path_to_store)
-        plt.savefig(path_to_store + str(iteration).zfill(4),  bbox_extra_artists=(lgd, title), bbox_inches='tight')
+        utilities.makedir(path_to_store + f"{args.random_seed}/")
+        plt.savefig(path_to_store + f"{args.random_seed}/" + str(iteration).zfill(4),  bbox_extra_artists=(lgd, title), bbox_inches='tight')
         plt.close()
