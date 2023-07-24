@@ -2,7 +2,7 @@ import logging
 import acquisitions, datasets, core, utilities
 
 class ActiveLearning:
-    n_trials = 2 # DEBUG
+    n_trials = 50 #DEBUG
     
     def __init__(self, args):
         Dataclass = getattr(datasets, args.dataset.capitalize())

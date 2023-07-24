@@ -11,8 +11,8 @@ from acquisitions import Acquisition
 class KeychainBase(Acquisition):
 
     meta_arch = NN
-    n_meta_trials = 5 # DEBUG
-                                            # DEBUG
+    n_meta_trials = 50 #DEBUG
+                                            #DEBUG
     def __init__(self, buffer_capacity=1, forward_passes=20, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.forward_passes = forward_passes
@@ -97,7 +97,7 @@ class Keychain_naive(KeychainBase):
         return values
 
 class Keychain_autoencoder(KeychainBase):
-    ae_n_trials = 5 #DEBUG
+    ae_n_trials = 25 #DEBUG
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -128,7 +128,7 @@ class Keychain_autoencoder(KeychainBase):
 
     def collect_inputs(self, x):
         probs = self.clf(torch.Tensor(x))
-        values = torch.cat((torch.Tensor(x), probs), dim=-1)
+        values = torch.cat((torch.Tensor(x).to(self.clf.device), probs), dim=-1)
         ae_outputs = self.ae(torch.Tensor(values))
         ae_loss = torch.pow((ae_outputs - values).sum(dim=-1), 2).reshape(-1, 1)
         collected_values = np.concatenate((x, probs.cpu(), ae_loss.cpu()), axis=-1)

@@ -22,7 +22,7 @@ class Visualize:
         }
     max_dot_size = 150
     fontsize='medium'
-    contour_levels = 20
+    contour_levels = 10
     test_perf = np.array([])
     markersize = 14
     plt.rcParams.update({'font.size': 18})
