@@ -40,7 +40,7 @@ pip install .
 
 ## Online Tuning
 
-- [X] 50 tuning trials
+- [X] ~~50~~ 25 tuning trials
 - [X] Budget ~40 % of the train split
 - [ ] Initially labeled:
   - [X] 20
