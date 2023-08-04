@@ -79,7 +79,7 @@ class Objective(BaseClass):
                 train_loader, val_loader = self.pool.get_train_val_loaders(train_idx, val_idx)
                 train_perf, val_perf = self.clf.fit(train_loader=train_loader, val_loader=val_loader)
                 val_loss += float(val_perf[0])
-                print(fold_num, suggest_dict, val_perf)
+                # print(fold_num, suggest_dict, val_perf)
                 trial.report(float(val_loss), fold_num)
                 if trial.should_prune():
                     raise optuna.TrialPruned()
