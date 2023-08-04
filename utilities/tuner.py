@@ -29,7 +29,7 @@ class Tuner(BaseClass):
     #CAVEAT check the objective direction   #DEBUG  
     def __init__(self, n_trials, direction="minimize", n_startup_trials=10, *args, **kwargs):    
         super().__init__(*args, **kwargs)
-        # optuna.logging.set_verbosity(optuna.logging.WARNING) #DEBUG
+        optuna.logging.set_verbosity(optuna.logging.WARNING) #DEBUG
         self.n_trials = n_trials  
         if self.split == "dynamic":
             n_warmup_steps = int((self.pool.dynamic_splits)*self.share_warmup_steps)
