@@ -8,15 +8,12 @@ class Bald(Acquisition):
     
     def get_scores(self, values=None):
 
-        self.clf.model.train()        # To enable Dropout 
         if values is None:
            values = self.pool.get("unlabeled")[0]
         total_predictions = torch.empty((0, len(values), self.pool.n_classes)).to(self.clf.device)
         for _ in range(self.forward_passes):
-            probs = self.clf(torch.Tensor(values))
+            probs = self.clf(torch.Tensor(values), mc_dropout=True)
             total_predictions = torch.cat((total_predictions, torch.unsqueeze(probs, 0)))
-
-        self.clf.model.eval()        # To disable Dropout 
         
         average_prob =  total_predictions.mean(dim=0)
         total_uncertainty = -(average_prob*torch.log(average_prob)).sum(dim=-1)

@@ -32,7 +32,7 @@ class KeychainBase(Acquisition):
         intact_new_labeled_idx = copy.copy(current_pool.idx_new_lb)
         playground_clf = copy.deepcopy(self.clf)
         
-        unviolated_train_idx, unviolated_val_idx = next(current_pool.get_unviolated_splitter(tune=False))
+        unviolated_train_idx, unviolated_val_idx = self.pool.one_split()
         _, val_loader = current_pool.get_train_val_loaders(unviolated_train_idx, unviolated_val_idx)
         genuine_val_loss, _ = self.clf.eval(val_loader)
 

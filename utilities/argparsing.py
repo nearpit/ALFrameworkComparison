@@ -2,18 +2,17 @@ from argparse import ArgumentParser, BooleanOptionalAction
     
 def get_arguments():
     parser = ArgumentParser()
+    subparsers = parser.add_subparsers(help="sub-command help")
+
     parser.add_argument("-d", "--dataset",
                         help="What dataset to train on", 
                         required=True)
     parser.add_argument("-a", "--algorithm",
                         help="What active learning algorithm to evaluate",  
                         choices=["random",
-                                 "keychain_naive",
-                                 "keychain_autoencoder",
                                  "bald", 
                                  "coreset",
-                                 "entropy",
-                                 "margin"])
+                                 "entropy"])
     parser.add_argument("-r", "--random_seed",
                         help="What random seed to use",  
                         type=int,
@@ -29,9 +28,16 @@ def get_arguments():
                     type=int,
                     default=20)
     
-    parser.add_argument("-o", "--online",
-                    help="Are the hyperparameters searched online or they stay static? Options: --online or --no-online",
-                    default=True, 
-                    action=BooleanOptionalAction)
+    parser.add_argument("-hpo_mode",
+                        choices=["constant", "online"])
+    parser.add_argument("-s", "--split",
+                        choices=["whole", "initial", "static", "dynamic"])
     
-    return parser.parse_args()
+    args = parser.parse_args()
+   
+    if args.hpo_mode == 'constant' and args.split not in ['whole', 'initial']:
+        parser.error("When -hpo_mode is 'constant', --split must be 'whole' or 'initial'")
+    elif args.hpo_mode == 'online' and args.split not in ['static', 'dynamic']:
+        parser.error("When -hpo_mode is 'online', --split must be 'static' or 'dynamic'")
+
+    return args

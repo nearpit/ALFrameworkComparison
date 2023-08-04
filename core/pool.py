@@ -1,12 +1,11 @@
-import random
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Subset, ConcatDataset
 from sklearn.model_selection import ShuffleSplit
 
 class Pool:
-    n_splits = 10
     const_seed = 2**32 - 1
+    dynamic_splits = 6
 
     def __init__(self, data, args, val_share=None, n_initially_labeled=None, **kwargs):
         self.random_seed = args.random_seed
@@ -40,9 +39,9 @@ class Pool:
 
         
         self.set_seed(self.random_seed)
-        self.shuffle_splitter = ShuffleSplit(n_splits=self.n_splits, 
-                                             test_size=args.val_share,
-                                             random_state=self.random_seed)
+        self.splitter = ShuffleSplit(n_splits=self.dynamic_splits, 
+                                     test_size=args.val_share,
+                                     random_state=self.random_seed)
 
     def __getitem__(self, idx):
         return self.data["train"][idx]  
@@ -72,18 +71,21 @@ class Pool:
     def idx_ulb(self):
         return np.delete(self.idx_abs, self.idx_all_labeled) 
     
-    def get_unviolated_splitter(self, tune=True):
-        if tune:
-            self.set_seed(seed=self.random_seed)
-        return self.shuffle_splitter.split(self.unviolated_lb_dataset)
+    def one_split(self):
+        self.set_seed(seed=self.random_seed)
+        return next(self.splitter.split(self.unviolated_lb_dataset))
+    
+    def CV_splits(self):
+        self.set_seed(seed=self.const_seed)
+        return self.splitter.split(self.unviolated_lb_dataset)
     
     def fill_up(self):
-        self.idx_unviolated_lb = np.random.choice(self.idx_abs, size=len(self.idx_abs), replace=False)
+        self.idx_unviolated_lb = self.idx_abs
 
     def update_splitter(self, val_share):
-        self.shuffle_splitter = ShuffleSplit(n_splits=self.n_splits, 
-                                             test_size=val_share,
-                                             random_state=self.random_seed)
+        self.splitter = ShuffleSplit(n_splits=self.n_splits, 
+                                     test_size=val_share,
+                                     random_state=self.random_seed)
 
 
     def get_train_val_loaders(self, unviolated_train_idx, unviolated_val_idx):

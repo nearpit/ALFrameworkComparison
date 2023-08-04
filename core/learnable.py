@@ -1,12 +1,10 @@
-import copy
-import torch
+import copy, torch, optuna
 
-from utilities import NN, EarlyStopper, Tuner, OnlineAvg
+from utilities import NN, Tuner, OnlineAvg
 
 class Learnable:
 
     #DEBUG
-    avg_val_loss = 0
     model = None
     model_class = NN
     model_configs = {"MLP_clf": {"last_activation": "Softmax",
@@ -46,7 +44,12 @@ class Learnable:
         else:
             self.update_model_configs(model_configs)
 
-    def __call__(self, x):
+    def __call__(self, x, mc_dropout=False):
+      if mc_dropout:
+          self.model.train()
+      else:
+          self.model.eval()
+
       with torch.no_grad():
         return self.model(x.to(self.device))
     
@@ -68,14 +71,16 @@ class Learnable:
         self.embedding_hook()
     
     def eval(self, loader):
+        self.model.eval()
         total_loss = OnlineAvg()
+
         with torch.no_grad():
             for inputs, targets in loader:
 
                 targets = targets.to(self.device)
                 inputs = inputs.to(self.device)
 
-                predictions = self.model(inputs)
+                predictions = self(inputs.float())
 
                 batch_loss = self.model.criterion(predictions, targets)
                 total_loss += batch_loss.item()
@@ -85,10 +90,8 @@ class Learnable:
 
     @initilize_first
     def fit(self, train_loader, val_loader, trial=None):
-
+        self.model.train()
         self.reset_model()       # To bring the model to the same starting point
-        self.model.eval()        # To disable Dropout 
-        # early_stopper = EarlyStopper(patience=self.patience, n_warmup_epochs=self.n_warmup_epochs)
         train_loss = OnlineAvg()
 
         for epoch_num in range(self.epochs):
@@ -102,15 +105,17 @@ class Learnable:
                 
                 batch_loss = self.model.criterion(predictions, targets.float())
                 train_loss += batch_loss.item()
-                self.model.metrics_set.update(inputs=predictions, targets=targets)
                 self.model.zero_grad()
                 batch_loss.backward()
                 self.model.optimizer.step()
 
-            train_metrics = self.model.metrics_set.flush()
+            train_loss, train_metrics = self.eval(loader=train_loader)
             val_loss, val_metrics = self.eval(val_loader)
-            # if early_stopper.early_stop(float(val_loss)):
-            #     break
+            
+            if trial:
+                trial.report(float(val_loss), epoch_num)
+                if trial.should_prune():
+                    raise optuna.TrialPruned()
         return (train_loss, train_metrics),  (val_loss, val_metrics)
        
     def reset_model(self):
@@ -120,25 +125,27 @@ class Learnable:
                 if hasattr(layer, 'reset_parameters'):
                     layer.reset_parameters()
 
-    def tune_model(self, n_trials, online, tunable_hypers=None):
+    def tune_model(self, n_trials, hpo_mode, split):
         pool = copy.copy(self.pool)
-        if not online:
+        if hpo_mode=="constant" and split == "whole":
             pool.fill_up()
-            pool.update_splitter(val_share=0.2)
-        new_configs, avg_val_loss = Tuner(pool=pool,
-                                    clf=self,
-                                    n_trials=n_trials,
-                                    tunable_hypers=tunable_hypers,
-                                    previous_loss=self.avg_val_loss)()
-        # Update the avg loss
-        if not self.avg_val_loss or avg_val_loss < self.avg_val_loss:
-            self.avg_val_loss = float(avg_val_loss)
-            
-        self.update_model_configs(new_configs)
-        return self.train_model()
+        new_configs, new_model, (train_perf, val_perf) = Tuner(pool=pool,
+                                                               clf=self,
+                                                               n_trials=n_trials,
+                                                               hpo_mode=hpo_mode,
+                                                               split=split)()
+        if new_model is None: #dynamic split
+            self.update_model_configs(new_configs)
+            return self.train_model()
+        else: #static split
+            self.model = new_model
+            test_perf = None
+            if hasattr(self.pool, "test_loader"):
+                test_perf = self.eval(loader=self.pool.test_loader)
+            return train_perf, val_perf, test_perf
 
     def train_model(self):
-        unviolated_train_idx, unviolated_val_idx = next(self.pool.get_unviolated_splitter(tune=False))
+        unviolated_train_idx, unviolated_val_idx = self.pool.one_split()
         train_loader, val_loader = self.pool.get_train_val_loaders(unviolated_train_idx, unviolated_val_idx)
         train_perf, val_perf = self.fit(train_loader=train_loader, val_loader=val_loader)
         test_perf = None

@@ -4,7 +4,7 @@
     "n_honeypot": 0, 
     "n_classes": 2,
     "batch_size": 32,
-    "budget": 160,
+    "budget": 150,
     "metrics_dict": {
         "MulticlassAccuracy": {
             "num_classes": 2

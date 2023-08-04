@@ -13,5 +13,5 @@ class Moons(Toy):
     
     def generate_clean(self):
         return make_moons(n_samples=self.configs["n_instances"] - self.configs["n_honeypot"],
-                          noise=0.075,
+                          noise=0.25,
                           random_state=self.random_seed)

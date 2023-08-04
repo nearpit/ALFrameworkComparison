@@ -16,13 +16,14 @@ class Visualize:
     markers = {
             "test": "*",
             "new labeled": "x",
-            "unviolated labeled": "^",
+            "train": "X",
+            "val" : "^",
             "unlabeled": "2",
             "next added": "o"
         }
     max_dot_size = 150
     fontsize='medium'
-    contour_levels = 10
+    contour_levels = 30
     test_perf = np.array([])
     markersize = 14
     plt.rcParams.update({'font.size': 18})
@@ -56,7 +57,10 @@ class Visualize:
         ax.scatter(x[:, 0], x[:, 1], marker='2', c='grey', alpha=0.4, s=self.max_dot_size)
 
         x, y = self.pool.get("unviolated")
-        ax.scatter(x[:, 0], x[:, 1], marker=self.markers["unviolated labeled"], c=y.argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)
+        unviolated_train_idx, unviolated_val_idx = self.pool.one_split()
+        ax.scatter(x[unviolated_train_idx, 0], x[unviolated_train_idx, 1], marker=self.markers["train"], c=y[unviolated_train_idx].argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)
+        ax.scatter(x[unviolated_val_idx, 0], x[unviolated_val_idx, 1], marker=self.markers["val"], c=y[unviolated_val_idx].argmax(axis=-1), s=self.max_dot_size, cmap=plt.cm.coolwarm)
+
         x, y = self.pool.get("new_labeled")
 
         color = plt.cm.coolwarm(y.argmax(axis=-1)*255)
@@ -145,7 +149,9 @@ class Visualize:
         self.clf_eval(ax[2, 1], test_perf, split="test")
 
         title = plt.suptitle(f"{str(args.algorithm).capitalize()} Iter:{iteration} Random Seed:{args.random_seed}", fontweight="semibold", y=0.925)
-        unviolated_labeled = Line2D([0], [0], label='Unviolated Labeled', marker=self.markers['unviolated labeled'], markersize=self.markersize, color='black', linestyle='')
+        train = Line2D([0], [0], label='Train', marker=self.markers['train'], markersize=self.markersize, color='black', linestyle='')
+        val = Line2D([0], [0], label='Validation', marker=self.markers['val'], markersize=self.markersize, color='black', linestyle='')
+
         new_labeled = Line2D([0], [0], label='New Labeled', marker=self.markers['new labeled'], markersize=self.markersize, color='black', linestyle='')
 
         unlabeled_point = Line2D([0], [0], label='Unlabeled', marker=self.markers['unlabeled'], markersize=self.markersize*1.5, color='black', linestyle='')
@@ -155,7 +161,7 @@ class Visualize:
         class_0 = mpatches.Patch(color=plt.cm.coolwarm(0), label='Class A')  
         class_1 = mpatches.Patch(color=plt.cm.coolwarm(255), label='Class B')  
 
-        legend_elements = [chosen_point, unlabeled_point, unviolated_labeled, new_labeled, test_points, class_0, class_1]
+        legend_elements = [chosen_point, unlabeled_point, new_labeled, train, val, test_points, class_0, class_1]
         lgd = plt.figlegend(handles=legend_elements, 
                       loc='lower center', 
                       handletextpad=0.3,

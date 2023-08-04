@@ -19,7 +19,7 @@ def gather_results(args, idx_added, features_added, target_added, test_perf, val
                 pool.get_len("unlabeled"), 
                 pool.get_len("all_labeled"), 
                 args.val_share,
-                args.online,
+                f"{args.hpo_mode}_{args.split}",
                 args.n_initially_labeled,
                 idx]
     

@@ -12,7 +12,7 @@ class NN(nn.Module):
                  lr, 
                  weight_decay,
                  batch_size, 
-                 drop_rate=0.15, # there is no droprate during training - only for BALD within predictions
+                 drop_rate,
                  optimizer="SGD",
                  *args, **kwargs):
         
@@ -69,16 +69,16 @@ class MetricsSet:
         self.raw_metrics_dict = metrics_dict
         self.device = device
         self.result_dict = {}
-
-    def update(self, inputs, targets):
         for name, configs in self.raw_metrics_dict.items():
             attr = getattr(metrics, name)
             self.result_dict[name] = attr(device=self.device, **configs)
-                
+
+    def update(self, inputs, targets):
         for metric in self.result_dict.values():
             metric.update(inputs, targets.argmax(dim=-1))
 
     def flush(self):
         results = {key:val.compute().item() for key, val in self.result_dict.items()}
-        self.result_dict = {}
+
+        self.result_dict = {key:val.reset() for key, val in self.result_dict.items()} #reset values
         return results
