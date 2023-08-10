@@ -46,6 +46,7 @@ class ActiveLearning:
         abs_idx = None
         train_perf, val_perf, test_perf = self.train_first_hypers()
         self.show_intermediate_results(abs_idx, train_perf, val_perf, test_perf)
+        self.append_store_results(abs_idx, None, None, train_perf, val_perf, test_perf, -1)
         
         if self.budget <  self.pool.get_len("unlabeled"):
             for iteration in range(0, self.budget):
