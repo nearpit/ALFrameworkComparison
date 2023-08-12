@@ -9,7 +9,6 @@ class Coreset(Acquisition):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
     
-    # @Learnable.hook_once    
     def get_scores(self, values=None):
         if values is None:
             values = self.pool.get("unlabeled")[0]

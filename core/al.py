@@ -79,7 +79,7 @@ class ActiveLearning:
 
     
     def show_intermediate_results(self, abs_idx, train_perf, val_perf, test_perf):
-        logging.warning(f'{abs_idx} {self.pool.get_len("all_labeled")} {self.pool.get_len("unlabeled")} {utilities.get_name(args=self.args)}\n{train_perf}\n{val_perf}\n{test_perf}')
+        logging.warning(f'{abs_idx} {self.pool.get_len("all_labeled")} {self.pool.get_len("unlabeled")} {utilities.get_name(args=self.args)} {self.args.hpo_mode} {self.args.split} \n{train_perf}\n{val_perf}\n{test_perf}')
 
     def visualize(self, iteration, train_perf, val_perf, test_perf, chosen_idx):
         if hasattr(self, "visualizer"):
