@@ -67,6 +67,8 @@ class ActiveLearning:
                 self.show_intermediate_results(abs_idx, train_perf, val_perf, test_perf)
                 features_added, target_added = self.pool[abs_idx]
                 self.append_store_results(abs_idx, features_added, target_added, train_perf, val_perf, test_perf, iteration)
+                if iteration > self.budget:
+                    break
 
         # if we train on the whole dataset
         elif self.args.n_initially_labeled == -1:        
