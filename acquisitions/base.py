@@ -20,7 +20,7 @@ class Acquisition:
     def query(self):
         all_scores = self.get_scores()
         max_scores = np.argwhere(np.isclose(all_scores, all_scores.max())).ravel()
-        if not max_scores:
+        if max_scores.size == 0:
             print(all_scores)
             print()
             print(all_scores.max())
