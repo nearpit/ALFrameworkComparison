@@ -19,14 +19,16 @@ class Acquisition:
 
     def query(self):
         all_scores = self.get_scores()
-        max_scores = np.argwhere(np.isclose(all_scores, all_scores.max())).ravel()
-        if max_scores.size == 0:
+        max_scores = np.argwhere(np.isclose(all_scores, all_scores.max())).ravel()            
+        self.pool.set_seed()
+        try:
+            idx = np.random.choice(max_scores, 1)[0]
+        except:
             print(all_scores)
             print()
             print(all_scores.max())
             print(max_scores)
             print(np.isclose(all_scores, all_scores.max()))
-        self.pool.set_seed()
-        idx = np.random.choice(max_scores, 1)[0]
+            raise ValueError
         return self.pool.idx_ulb[idx]
     
