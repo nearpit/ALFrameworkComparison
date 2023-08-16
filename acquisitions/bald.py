@@ -16,7 +16,7 @@ class Bald(Acquisition):
             total_predictions = torch.cat((total_predictions, torch.unsqueeze(probs, 0)))
         
         average_prob =  total_predictions.mean(dim=0)
-        total_uncertainty = -(average_prob*torch.log(average_prob + torch.finfo(torch.float32).eps)).sum(dim=-1)
-        data_uncertainty = (-(total_predictions*torch.log(total_predictions + torch.finfo(torch.float32).eps))).sum(dim=-1).mean(dim=0)
+        total_uncertainty = -(average_prob*torch.log(average_prob + torch.finfo(torch.float32).smallest_normal)).sum(dim=-1)
+        data_uncertainty = (-(total_predictions*torch.log(total_predictions + torch.finfo(torch.float32).smallest_normal))).sum(dim=-1).mean(dim=0)
         knowledge_uncertainty = total_uncertainty - data_uncertainty
         return knowledge_uncertainty.cpu()
