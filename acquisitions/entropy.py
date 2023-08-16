@@ -9,6 +9,6 @@ class Entropy(Acquisition):
         if values is None:
             values, y = self.pool.get("unlabeled")
         probs = self.clf(torch.Tensor(values)).cpu()
-        log_probs = torch.log(probs + torch.finfo(torch.float32).eps)
+        log_probs = torch.log(probs + torch.finfo(torch.float32).smallest_normal)
         U = -(probs*log_probs).sum(axis=1)
         return U
