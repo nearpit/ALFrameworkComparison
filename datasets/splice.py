@@ -3,7 +3,7 @@ from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
 class Splice(SVMDataset):
     # split train for validation
-    urls_dict = {"train":"https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/splice_scale",
+    urls_dict = {"train":"https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/splice",
                  "test": "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/splice.t"}
     dataset_name = "splice"
     feature_encoder =  MinMaxScaler()
