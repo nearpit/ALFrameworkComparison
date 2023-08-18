@@ -4,19 +4,19 @@
 
 ### Random Sampling Baseline
 
-![random](https://github.com/Nearpit/ALRM/blob/main/visalization/entropy.gif)
+![random](https://github.com/Nearpit/ALRM/blob/main/visualization/entropy.gif)
 
 ### Coreset
 
-![coreset](https://github.com/Nearpit/ALRM/blob/main/visalization/coreset.gif)
+![coreset](https://github.com/Nearpit/ALRM/blob/main/visualization/coreset.gif)
 
 ### Entropy
 
-![entropy](https://github.com/Nearpit/ALRM/blob/main/visalization/entropy.gif)
+![entropy](https://github.com/Nearpit/ALRM/blob/main/visualization/entropy.gif)
 
 ### BALD
 
-![bald](https://github.com/Nearpit/ALRM/blob/main/visalization/bald.gif)
+![bald](https://github.com/Nearpit/ALRM/blob/main/visualization/bald.gif)
 
 ## Installation
 
