@@ -2,11 +2,21 @@
 
 ## Acquisition Functions Visualization
 
-![random](https://github.com/Nearpit/ALRM/blob/main/entropy.gif)
-![coreset](https://github.com/Nearpit/ALRM/blob/main/coreset.gif)
-![entropy](https://github.com/Nearpit/ALRM/blob/main/entropy.gif)
-![bald](https://github.com/Nearpit/ALRM/blob/main/bald.gif)
+### Random Sampling Baseline
 
+![random](https://github.com/Nearpit/ALRM/blob/main/entropy.gif)
+
+### Coreset
+
+![coreset](https://github.com/Nearpit/ALRM/blob/main/coreset.gif)
+
+### Entropy
+
+![entropy](https://github.com/Nearpit/ALRM/blob/main/entropy.gif)
+
+### BALD
+
+![bald](https://github.com/Nearpit/ALRM/blob/main/bald.gif)
 
 ## Installation
 
