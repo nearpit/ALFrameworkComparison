@@ -1,4 +1,4 @@
-# Name Master Thesis
+# Please, Cease Employing Static Hyper-Parameters in Active Learning: A Comprehensive Framework Comparison
 
 ## Acquisition Functions Visualization
 
